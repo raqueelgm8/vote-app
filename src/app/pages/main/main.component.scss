@@ -1,0 +1,48 @@
+.sidenav-container {
+  height: 100vh;
+  display: flex;
+}
+
+.sidenav {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+button {
+  width: 100%;
+  justify-content: start;
+}
+
+.active-link {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+mat-icon {
+  margin-right: 12px;
+  vertical-align: middle;
+}
+
+mat-toolbar button[mat-icon-button] {
+  padding: 0;
+  margin-left: 0;
+  width: 40px;
+  height: 40px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
