@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoginComponent } from './pages/login/login.component';
 import { MainComponent } from './pages/main/main.component';
-import { AuthService } from './services/auth';
+import { AuthService } from './services/auth.service';
 import { LoadingSpinnerComponent } from './pages/_components/loading-spinner/loading-spinner.component';
 import { User } from '@angular/fire/auth';
 

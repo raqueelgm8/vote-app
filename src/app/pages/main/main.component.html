@@ -4,36 +4,44 @@
 
     <mat-toolbar color="primary">Menu</mat-toolbar>
 
-    <mat-nav-list>
-      <mat-list-item routerLink="/home" routerLinkActive="active-link" (click)="isMobile ? drawer.close() : null">
-        <mat-icon>home</mat-icon>
-        <span>Inicio</span>
-      </mat-list-item>
-      <mat-list-item routerLink="/create-room" routerLinkActive="active-link"
-        (click)="isMobile ? drawer.close() : null">
-        <mat-icon>add_circle</mat-icon>
-        <span>Crear Sala</span>
-      </mat-list-item>
-      <mat-list-item routerLink="/active-room" routerLinkActive="active-link"
-        (click)="isMobile ? drawer.close() : null">
-        <mat-icon>qr_code</mat-icon>
-        <span>Sala Activa</span>
-      </mat-list-item>
-      <mat-list-item routerLink="/configure-voting" routerLinkActive="active-link"
-        (click)="isMobile ? drawer.close() : null">
-        <mat-icon>settings</mat-icon>
-        <span>Configurar Votación</span>
-      </mat-list-item>
-      <mat-list-item routerLink="/results" routerLinkActive="active-link" (click)="isMobile ? drawer.close() : null">
-        <mat-icon>bar_chart</mat-icon>
-        <span>Resultados</span>
-      </mat-list-item>
+    <mat-nav-list class="nav-list">
+      <div class="nav-content">
+        <div>
+          <mat-list-item routerLink="/home" routerLinkActive="active-link" (click)="isMobile ? drawer.close() : null">
+            <mat-icon>home</mat-icon>
+            <span>Inicio</span>
+          </mat-list-item>
+          <mat-list-item routerLink="/create-room" routerLinkActive="active-link"
+            (click)="isMobile ? drawer.close() : null">
+            <mat-icon>add_circle</mat-icon>
+            <span>Crear Sala</span>
+          </mat-list-item>
+          <mat-list-item routerLink="/active-room" routerLinkActive="active-link"
+            (click)="isMobile ? drawer.close() : null">
+            <mat-icon>qr_code</mat-icon>
+            <span>Sala Activa</span>
+          </mat-list-item>
+          <mat-list-item routerLink="/configure-voting" routerLinkActive="active-link"
+            (click)="isMobile ? drawer.close() : null">
+            <mat-icon>settings</mat-icon>
+            <span>Configurar Votación</span>
+          </mat-list-item>
+          <mat-list-item routerLink="/results" routerLinkActive="active-link"
+            (click)="isMobile ? drawer.close() : null">
+            <mat-icon>bar_chart</mat-icon>
+            <span>Resultados</span>
+          </mat-list-item>
+        </div>
 
-      <div class="spacer"></div>
-      <button mat-button color="warn" (click)="logout()" class="pointer">
-        <mat-icon>logout</mat-icon>
-        Cerrar sesión
-      </button>
+        <div class="spacer"></div>
+        <div>
+          <button mat-button color="warn" (click)="logout()" class="logout-btn">
+            <mat-icon>logout</mat-icon>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
     </mat-nav-list>
   </mat-sidenav>
 
