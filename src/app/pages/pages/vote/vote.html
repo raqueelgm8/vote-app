@@ -3,6 +3,18 @@
     <h1>{{ room.name }}</h1>
     <p class="meta">Código: {{ room.code }}</p>
 
+    <div
+      *ngIf="notice"
+      #noticeEl
+      class="notice"
+      [class.error]="notice.type === 'error'"
+      [class.success]="notice.type === 'success'"
+      [class.info]="notice.type === 'info'"
+    >
+      <span class="notice-dot"></span>
+      <span>{{ notice.text }}</span>
+    </div>
+
     <div *ngIf="room.status === 'waiting'" class="state">
       <p>La votación aún no ha empezado.</p>
     </div>
@@ -48,5 +60,5 @@
 </ng-template>
 
 <ng-template #missingTpl>
-  <p>No se encontro la sala.</p>
+  <p>No se encontró la sala.</p>
 </ng-template>

@@ -18,8 +18,10 @@ export class CreateRoomComponent {
   votingName = '';
   optionName = '';
   options: string[] = [];
+  durationMinutes = 3;
   roomCode = '';
   qrCodeValue = '';
+  notice: { type: 'error' | 'success' | 'info'; text: string } | null = null;
 
   get canCreateRoom() {
     return !!this.votingName.trim() && this.options.length >= 2 && !this.roomCode;
@@ -33,12 +35,19 @@ export class CreateRoomComponent {
 
     const exists = this.options.some(option => option.toLowerCase() === trimmed.toLowerCase());
     if (exists) {
-      alert('Ese nombre ya existe.');
+      this.setNotice('error', 'Ese nombre ya existe.');
       return;
     }
 
     this.options = [...this.options, trimmed];
     this.optionName = '';
+  }
+
+  clampDuration() {
+    const value = Number(this.durationMinutes);
+    if (!Number.isFinite(value) || value < 1) {
+      this.durationMinutes = 1;
+    }
   }
 
   removeOption(index: number) {
@@ -49,18 +58,24 @@ export class CreateRoomComponent {
   async createRoom() {
 
     if (this.roomCode) {
-      alert('La sala ya está creada.');
+      this.setNotice('info', 'La sala ya está creada.');
       return;
     }
 
     if (!this.votingName.trim()) {
-      alert('Escribe un nombre para la votación.');
+      this.setNotice('error', 'Escribe un nombre para la votación.');
       return;
     }
 
     const cleanedOptions = this.options.map(option => option.trim()).filter(Boolean);
     if (cleanedOptions.length < 2) {
-      alert('Agrega al menos 2 nombres para votar.');
+      this.setNotice('error', 'Agrega al menos 2 nombres para votar.');
+      return;
+    }
+
+    const duration = Number(this.durationMinutes);
+    if (!Number.isFinite(duration) || duration < 1) {
+      this.setNotice('error', 'La duración debe ser un número mayor o igual a 1.');
       return;
     }
 
@@ -73,7 +88,8 @@ export class CreateRoomComponent {
         this.votingName.trim(),
         code,
         'admin',
-        cleanedOptions
+        cleanedOptions,
+        duration
       );
 
       this.roomCode = code;
@@ -83,7 +99,7 @@ export class CreateRoomComponent {
 
     } catch (error) {
 
-      alert('Error creando la sala');
+      this.setNotice('error', 'No se pudo crear la sala. Intenta de nuevo.');
       console.error(error);
 
     }
@@ -92,15 +108,15 @@ export class CreateRoomComponent {
 
   startVoting() {
     if (!this.roomCode) {
-      alert('Primero crea una sala');
+      this.setNotice('info', 'Primero crea una sala.');
       return;
     }
 
     this.roomService.startVoting(this.roomCode)
-      .then(() => alert(`Votación iniciada en sala: ${this.roomCode}`))
+      .then(() => this.setNotice('success', `Votación iniciada en sala ${this.roomCode}.`))
       .catch(error => {
         console.error(error);
-        alert('Error iniciando la votación');
+        this.setNotice('error', 'No se pudo iniciar la votación.');
       });
   }
 
@@ -111,6 +127,10 @@ export class CreateRoomComponent {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
+  }
+
+  private setNotice(type: 'error' | 'success' | 'info', text: string) {
+    this.notice = { type, text };
   }
 
 }

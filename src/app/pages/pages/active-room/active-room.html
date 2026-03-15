@@ -1,65 +1,106 @@
 <div class="room-page" *ngIf="!loading; else loadingTpl">
   <ng-container *ngIf="room$ | async as room; else missingTpl">
     <div class="room-card">
+      <div
+        *ngIf="notice"
+        #noticeEl
+        class="notice"
+        [class.error]="notice.type === 'error'"
+        [class.success]="notice.type === 'success'"
+        [class.info]="notice.type === 'info'"
+      >
+        <span class="notice-dot"></span>
+        <span>{{ notice.text }}</span>
+      </div>
+
       <div class="room-header">
         <div>
+          <p class="eyebrow">Sala activa</p>
           <h1>{{ room.name }}</h1>
-          <p class="meta">Código: {{ room.code }}</p>
+          <p class="meta">Código: <strong>{{ room.code }}</strong></p>
         </div>
-        <span class="status" [class.archived]="room.status === 'archived'">{{ room.status }}</span>
+        <span
+          class="status"
+          [class.waiting]="room.status === 'waiting'"
+          [class.voting]="room.status === 'voting'"
+          [class.closed]="room.status === 'closed'"
+          [class.archived]="room.status === 'archived'"
+        >
+          {{ statusLabel(room.status) }}
+        </span>
       </div>
 
-    <div *ngIf="room.status === 'waiting'" class="editor">
-      <label for="optionName">Nombres para votar:</label>
-      <div class="option-input">
-        <input id="optionName" [(ngModel)]="optionName" placeholder="Ej: Equipo A" (keydown.enter)="addOption()" />
-        <button type="button" (click)="addOption()">Añadir</button>
-      </div>
-      <p class="hint">Agrega al menos 2 nombres y guarda antes de comenzar.</p>
+      <div class="room-sections">
+        <section *ngIf="room.status === 'waiting'" class="panel editor">
+          <div class="panel-head">
+            <h2>Configurar votación</h2>
+            <span class="panel-pill">Pendiente</span>
+          </div>
+          <label for="optionName">Nombres para votar</label>
+          <div class="option-input">
+            <input id="optionName" [(ngModel)]="optionName" placeholder="Ej: Equipo A" (keydown.enter)="addOption()" />
+            <button type="button" class="primary" (click)="addOption()">Añadir</button>
+          </div>
+          <p class="hint">Agrega al menos 2 nombres y guarda antes de comenzar.</p>
 
-      <ul class="options" *ngIf="optionsDraft.length">
-        <li *ngFor="let option of optionsDraft; let i = index">
-          <span>{{ option }}</span>
-          <button type="button" class="ghost" (click)="removeOption(i)">Quitar</button>
-        </li>
-      </ul>
+          <ul class="options" *ngIf="optionsDraft.length">
+            <li *ngFor="let option of optionsDraft; let i = index">
+              <span>{{ option }}</span>
+              <button type="button" class="ghost" (click)="removeOption(i)">Quitar</button>
+            </li>
+          </ul>
 
-      <div class="action-row">
-        <button type="button" (click)="saveOptions()" [disabled]="!hasPendingChanges">Guardar cambios</button>
-        <button type="button" (click)="startVoting()">Comenzar votación</button>
-      </div>
-    </div>
+          <div class="action-row">
+            <button type="button" class="ghost" (click)="saveOptions()" [disabled]="!hasPendingChanges">
+              Guardar cambios
+            </button>
+            <button type="button" class="primary" (click)="startVoting()">Comenzar votación</button>
+          </div>
+        </section>
 
-      <div class="qr-container" *ngIf="qrCodeValue && room.status !== 'closed' && room.status !== 'archived'">
-        <p>Escanea este QR para unirte y votar:</p>
-        <qrcode [qrdata]="qrCodeValue" [width]="200"></qrcode>
-      </div>
+        <section *ngIf="room.status === 'voting'" class="panel state">
+          <div class="panel-head">
+            <h2>Votación en curso</h2>
+            <span class="timer-pill">{{ timeLeft }}</span>
+          </div>
+          <p>La sala se cerrará automáticamente cuando termine el tiempo.</p>
+        </section>
 
-      <div *ngIf="room.status === 'voting'" class="state">
-        <p>Tiempo restante: {{ timeLeft }}</p>
-        <p>Votación en curso...</p>
-      </div>
+        <section *ngIf="room.status === 'closed'" class="panel state">
+          <div class="panel-head">
+            <h2>Resultados finales</h2>
+            <span class="winner-pill">Ganador: {{ winnerLabel }}</span>
+          </div>
+          <p class="meta">Total votos: {{ room.totalVotes || 0 }}</p>
+          <ul class="results">
+            <li *ngFor="let item of results">
+              <span class="position">#{{ item.position }}</span>
+              <span class="name">{{ item.name }}</span>
+              <span class="votes">{{ item.votes }} votos</span>
+              <span class="percent">{{ item.percent }}%</span>
+              <div class="bar">
+                <span class="fill" [style.width.%]="item.percent"></span>
+              </div>
+            </li>
+          </ul>
+        </section>
 
-      <div *ngIf="room.status === 'closed'" class="state">
-        <h2>Resultados</h2>
-        <p class="winner">Ganador: {{ winnerLabel }}</p>
-        <p>Total votos: {{ room.totalVotes || 0 }}</p>
-        <ul class="results">
-          <li *ngFor="let item of results">
-            <span class="position">#{{ item.position }}</span>
-            <span class="name">{{ item.name }}</span>
-            <span class="votes">{{ item.votes }} votos</span>
-            <span class="percent">{{ item.percent }}%</span>
-            <div class="bar">
-              <span class="fill" [style.width.%]="item.percent"></span>
-            </div>
-          </li>
-        </ul>
-      </div>
+        <section *ngIf="room.status === 'archived'" class="panel state">
+          <h2>Sala archivada</h2>
+          <p>No se pueden realizar acciones en esta sala.</p>
+        </section>
 
-      <div *ngIf="room.status === 'archived'" class="state">
-        <h2>Sala archivada</h2>
-        <p>No se pueden realizar acciones en esta sala.</p>
+        <section *ngIf="qrCodeValue && room.status !== 'closed' && room.status !== 'archived'" class="panel qr-panel">
+          <div class="panel-head">
+            <h2>QR para votar</h2>
+            <span class="panel-pill">Compartir</span>
+          </div>
+          <p>Escanea con el móvil para entrar en la votación.</p>
+          <div class="qr-code">
+            <qrcode [qrdata]="qrCodeValue" [width]="220"></qrcode>
+          </div>
+          <p class="hint">Este código se desactivará al cerrar la votación.</p>
+        </section>
       </div>
     </div>
   </ng-container>

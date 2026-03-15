@@ -8,7 +8,7 @@ export class RoomService {
 
   constructor(private firestore: Firestore) { }
 
-  async createRoom(name: string, code: string, createdBy: string, options: string[]) {
+  async createRoom(name: string, code: string, createdBy: string, options: string[], durationMinutes: number) {
 
     const roomRef = doc(this.firestore, `rooms/${code}`);
 
@@ -23,6 +23,8 @@ export class RoomService {
       votes[option] = 0;
     });
 
+    const safeDuration = typeof durationMinutes === 'number' && durationMinutes > 0 ? durationMinutes : 3;
+
     await setDoc(roomRef, {
       name,
       code,
@@ -31,6 +33,7 @@ export class RoomService {
       options,
       votes,
       totalVotes: 0,
+      durationMinutes: safeDuration,
       createdAt: Timestamp.now()
     });
 
@@ -55,8 +58,11 @@ export class RoomService {
       votes[option] = 0;
     });
 
+    const durationMinutes = typeof data['durationMinutes'] === 'number' && data['durationMinutes'] > 0
+      ? data['durationMinutes']
+      : 3;
     const now = Timestamp.now();
-    const endsAt = Timestamp.fromDate(new Date(now.toDate().getTime() + 3 * 60 * 1000));
+    const endsAt = Timestamp.fromDate(new Date(now.toDate().getTime() + durationMinutes * 60 * 1000));
 
     return updateDoc(roomRef, {
       status: 'voting',

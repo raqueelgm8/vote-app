@@ -33,6 +33,67 @@ h2 {
   margin-bottom: 16px;
 }
 
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  background: rgba(119, 160, 169, 0.18);
+  border: 1px solid rgba(119, 160, 169, 0.3);
+  color: #e6f1f3;
+  text-align: left;
+  animation: noticePulse 3s ease-out;
+  margin-top: -6px;
+}
+
+.notice-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #77a0a9;
+  box-shadow: 0 0 8px rgba(119, 160, 169, 0.6);
+  flex-shrink: 0;
+}
+
+.notice.error {
+  background: rgba(160, 78, 78, 0.2);
+  border-color: rgba(160, 78, 78, 0.4);
+  color: #f5dada;
+}
+
+.notice.error .notice-dot {
+  background: #d18686;
+  box-shadow: 0 0 8px rgba(209, 134, 134, 0.7);
+}
+
+.notice.success {
+  background: rgba(92, 143, 124, 0.22);
+  border-color: rgba(92, 143, 124, 0.45);
+  color: #daf1e7;
+}
+
+.notice.success .notice-dot {
+  background: #7fc3a7;
+  box-shadow: 0 0 8px rgba(127, 195, 167, 0.7);
+}
+
+@keyframes noticePulse {
+  0% {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    background: rgba(160, 196, 204, 0.45);
+  }
+  40% {
+    box-shadow: 0 0 20px rgba(119, 160, 169, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    background: rgba(119, 160, 169, 0.18);
+  }
+}
+
 .timer {
   font-weight: 700;
   margin-bottom: 12px;

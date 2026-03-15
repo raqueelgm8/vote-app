@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { QRCodeComponent } from 'angularx-qrcode';
@@ -34,8 +34,11 @@ export class ActiveRoom implements OnInit, OnDestroy {
   optionName = '';
   optionsDraft: string[] = [];
   hasPendingChanges = false;
+  notice: { type: 'error' | 'success' | 'info'; text: string } | null = null;
+  @ViewChild('noticeEl') noticeEl?: ElementRef<HTMLElement>;
   private timerId: number | undefined;
   private roomSub: any;
+  private noticeTimeoutId: number | undefined;
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -66,6 +69,9 @@ export class ActiveRoom implements OnInit, OnDestroy {
     if (this.timerId) {
       clearInterval(this.timerId);
     }
+    if (this.noticeTimeoutId) {
+      clearTimeout(this.noticeTimeoutId);
+    }
     if (this.roomSub) {
       this.roomSub.unsubscribe();
     }
@@ -74,7 +80,7 @@ export class ActiveRoom implements OnInit, OnDestroy {
   startVoting() {
     if (!this.roomCode) return;
     if (this.hasPendingChanges) {
-      alert('Guarda los cambios antes de comenzar la votación.');
+      this.setNotice('info', 'Guarda los cambios antes de comenzar la votación.');
       return;
     }
 
@@ -90,7 +96,7 @@ export class ActiveRoom implements OnInit, OnDestroy {
 
     const exists = this.optionsDraft.some(option => option.toLowerCase() === trimmed.toLowerCase());
     if (exists) {
-      alert('Ese nombre ya existe.');
+      this.setNotice('error', 'Ese nombre ya existe.');
       return;
     }
 
@@ -109,7 +115,7 @@ export class ActiveRoom implements OnInit, OnDestroy {
     if (!this.room || this.room.status !== 'waiting') return;
     const cleaned = this.optionsDraft.map(option => option.trim()).filter(Boolean);
     if (cleaned.length < 2) {
-      alert('Agrega al menos 2 nombres para votar.');
+      this.setNotice('error', 'Agrega al menos 2 nombres para votar.');
       return;
     }
 
@@ -117,11 +123,12 @@ export class ActiveRoom implements OnInit, OnDestroy {
       .then(() => {
         this.optionsDraft = cleaned;
         this.hasPendingChanges = false;
+        this.setNotice('success', 'Cambios guardados.');
         this.cdr.markForCheck();
       })
       .catch(err => {
         console.error(err);
-        alert('No se pudieron guardar los cambios.');
+        this.setNotice('error', 'No se pudieron guardar los cambios.');
       });
   }
 
@@ -192,6 +199,35 @@ export class ActiveRoom implements OnInit, OnDestroy {
   private toDate(value: any): Date {
     if (value?.toDate) return value.toDate();
     return new Date(value);
+  }
+
+  private setNotice(type: 'error' | 'success' | 'info', text: string) {
+    this.notice = { type, text };
+    setTimeout(() => {
+      this.noticeEl?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+    if (this.noticeTimeoutId) {
+      clearTimeout(this.noticeTimeoutId);
+    }
+    this.noticeTimeoutId = window.setTimeout(() => {
+      this.notice = null;
+      this.cdr.markForCheck();
+    }, 4500);
+  }
+
+  statusLabel(status: string): string {
+    switch (status) {
+      case 'waiting':
+        return 'En espera';
+      case 'voting':
+        return 'Votación';
+      case 'closed':
+        return 'Cerrada';
+      case 'archived':
+        return 'Archivada';
+      default:
+        return status;
+    }
   }
 
 }

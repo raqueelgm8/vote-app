@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { RoomService } from '../../../services/room.service';
@@ -28,8 +28,11 @@ export default class Vote implements OnInit, OnDestroy {
   timeLeft = '';
   hasVoted = false;
   selectedOption = '';
+  notice: { type: 'error' | 'success' | 'info'; text: string } | null = null;
+  @ViewChild('noticeEl') noticeEl?: ElementRef<HTMLElement>;
   private timerId: number | undefined;
   private roomSub: any;
+  private noticeTimeoutId: number | undefined;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -58,6 +61,9 @@ export default class Vote implements OnInit, OnDestroy {
     if (this.timerId) {
       clearInterval(this.timerId);
     }
+    if (this.noticeTimeoutId) {
+      clearTimeout(this.noticeTimeoutId);
+    }
     if (this.roomSub) {
       this.roomSub.unsubscribe();
     }
@@ -66,7 +72,7 @@ export default class Vote implements OnInit, OnDestroy {
   vote(option: string) {
     if (!this.room || this.room.status !== 'voting') return;
     if (this.hasVoted) {
-      alert('Ya has votado en esta sala.');
+      this.setNotice('info', 'Ya has votado en esta sala.');
       return;
     }
 
@@ -75,11 +81,12 @@ export default class Vote implements OnInit, OnDestroy {
         this.hasVoted = true;
         this.selectedOption = option;
         localStorage.setItem(this.voteKey(), option);
+        this.setNotice('success', 'Voto registrado. ¡Gracias!');
         this.cdr.markForCheck();
       })
       .catch(error => {
         console.error(error);
-        alert('No se pudo registrar tu voto.');
+        this.setNotice('error', 'No se pudo registrar tu voto.');
       });
   }
 
@@ -160,5 +167,20 @@ export default class Vote implements OnInit, OnDestroy {
 
   private voteKey() {
     return `vote:${this.roomCode}`;
+  }
+
+  private setNotice(type: 'error' | 'success' | 'info', text: string) {
+    this.notice = { type, text };
+    this.cdr.markForCheck();
+    setTimeout(() => {
+      this.noticeEl?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+    if (this.noticeTimeoutId) {
+      clearTimeout(this.noticeTimeoutId);
+    }
+    this.noticeTimeoutId = window.setTimeout(() => {
+      this.notice = null;
+      this.cdr.markForCheck();
+    }, 4500);
   }
 }
