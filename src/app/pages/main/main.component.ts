@@ -16,6 +16,8 @@ import { Router, RouterModule } from '@angular/router';
 })
 export class MainComponent implements OnInit {
   isMobile = false;
+  sidenavOpened = true;
+  userToggled = false;
   @ViewChild('drawer') sidenav!: MatSidenav;
 
   constructor(private router: Router, private authService: AuthService) { }
@@ -30,13 +32,23 @@ export class MainComponent implements OnInit {
   }
 
   checkScreen() {
-    this.isMobile = window.innerWidth < 768;
+    this.isMobile = window.innerWidth < 900;
+    if (this.isMobile) {
+      this.sidenavOpened = false;
+    } else if (!this.userToggled) {
+      this.sidenavOpened = true;
+    }
   }
 
   closeSidenav() {
-    if (this.sidenav.mode === 'over') {
-      this.sidenav.close();
+    if (this.isMobile) {
+      this.sidenavOpened = false;
     }
+  }
+
+  toggleSidenav() {
+    this.sidenavOpened = !this.sidenavOpened;
+    this.userToggled = true;
   }
 
   logout() {
