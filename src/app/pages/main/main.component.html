@@ -6,7 +6,7 @@
       <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="toggleSidenav()">
         <mat-icon>menu</mat-icon>
       </button>
-      <span>Menu</span>
+      <span>Menú</span>
     </mat-toolbar>
 
     <mat-nav-list class="nav-list">
@@ -16,18 +16,19 @@
             <mat-icon>home</mat-icon>
             <span>Inicio</span>
           </mat-list-item>
-          <mat-list-item routerLink="/create-room" routerLinkActive="active-link"
-            (click)="closeSidenav()">
+          <mat-list-item routerLink="/create-room" routerLinkActive="active-link" (click)="closeSidenav()">
             <mat-icon>add_circle</mat-icon>
             <span>Crear Sala</span>
           </mat-list-item>
-          <mat-list-item routerLink="/rooms" routerLinkActive="active-link"
-            (click)="closeSidenav()">
+          <mat-list-item routerLink="/rooms" routerLinkActive="active-link" (click)="closeSidenav()">
             <mat-icon>qr_code</mat-icon>
             <span>Salas</span>
           </mat-list-item>
-          <mat-list-item routerLink="/results" routerLinkActive="active-link"
-            (click)="closeSidenav()">
+
+        </div>
+
+        <div>
+          <mat-list-item routerLink="/results" routerLinkActive="active-link" (click)="closeSidenav()">
             <mat-icon>bar_chart</mat-icon>
             <span>Resultados</span>
           </mat-list-item>
@@ -37,7 +38,7 @@
         <div class="logout-wrapper">
           <button mat-button (click)="logout()" class="logout-btn">
             <mat-icon>logout</mat-icon>
-            Cerrar sesion
+            Cerrar sesión
           </button>
         </div>
       </div>
@@ -47,11 +48,11 @@
 
   <mat-sidenav-content>
     <mat-toolbar color="primary" class="top-toolbar">
-      <button type="button" aria-label="Toggle sidenav" mat-icon-button class="menu-toggle"
+      <button *ngIf="!sidenavOpened" type="button" aria-label="Toggle sidenav" mat-icon-button class="menu-toggle"
         (click)="toggleSidenav()">
         <mat-icon>menu</mat-icon>
       </button>
-      <span>Vote App</span>
+      <span>Poetry Slam La Granja</span>
     </mat-toolbar>
 
     <div class="main-content">

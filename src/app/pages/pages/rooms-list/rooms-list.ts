@@ -28,7 +28,7 @@ import { ChangeDetectorRef } from '@angular/core';
       provide: MatPaginatorIntl,
       useFactory: () => {
         const intl = new MatPaginatorIntl();
-        intl.itemsPerPageLabel = 'Registros por pagina';
+        intl.itemsPerPageLabel = 'Registros por página';
         intl.nextPageLabel = 'Siguiente';
         intl.previousPageLabel = 'Anterior';
         intl.firstPageLabel = 'Primera';

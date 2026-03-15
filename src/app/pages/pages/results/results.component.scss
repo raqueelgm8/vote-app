@@ -93,6 +93,12 @@ h1 {
   align-items: flex-start;
 }
 
+.status-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .card-header h2 {
   margin: 0 0 6px;
   font-size: 20px;
@@ -125,6 +131,21 @@ h1 {
   background: rgba(75, 46, 57, 0.35);
   border-radius: 12px;
   padding: 12px;
+}
+
+.toggle-icon {
+  border: 1px solid rgba(119, 160, 169, 0.4);
+  background: transparent;
+  color: #e6f1f3;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .label {

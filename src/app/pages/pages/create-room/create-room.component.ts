@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { QRCodeComponent } from 'angularx-qrcode';
+import { Router } from '@angular/router';
 import { RoomService } from '../../../services/room.service';
 
 @Component({
@@ -13,6 +14,7 @@ import { RoomService } from '../../../services/room.service';
 export class CreateRoomComponent {
 
   private roomService = inject(RoomService);
+  private router = inject(Router);
   votingName = '';
   optionName = '';
   options: string[] = [];
@@ -47,12 +49,12 @@ export class CreateRoomComponent {
   async createRoom() {
 
     if (this.roomCode) {
-      alert('La sala ya esta creada.');
+      alert('La sala ya está creada.');
       return;
     }
 
     if (!this.votingName.trim()) {
-      alert('Escribe un nombre para la votacion.');
+      alert('Escribe un nombre para la votación.');
       return;
     }
 
@@ -77,6 +79,7 @@ export class CreateRoomComponent {
       this.roomCode = code;
       this.qrCodeValue = qrCode;
       this.options = cleanedOptions;
+      this.router.navigate(['/active-room'], { queryParams: { code } });
 
     } catch (error) {
 
@@ -94,10 +97,10 @@ export class CreateRoomComponent {
     }
 
     this.roomService.startVoting(this.roomCode)
-      .then(() => alert(`Votacion iniciada en sala: ${this.roomCode}`))
+      .then(() => alert(`Votación iniciada en sala: ${this.roomCode}`))
       .catch(error => {
         console.error(error);
-        alert('Error iniciando la votacion');
+        alert('Error iniciando la votación');
       });
   }
 

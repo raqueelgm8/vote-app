@@ -1,14 +1,19 @@
-<div *ngIf="!loading; else loadingTpl">
-  <ng-container *ngIf="room; else missingTpl">
-    <h1>Sala: {{ room.name }}</h1>
-    <p>Codigo: {{ room.code }}</p>
-    <p>Estado: {{ room.status }}</p>
+<div class="room-page" *ngIf="!loading; else loadingTpl">
+  <ng-container *ngIf="room$ | async as room; else missingTpl">
+    <div class="room-card">
+      <div class="room-header">
+        <div>
+          <h1>{{ room.name }}</h1>
+          <p class="meta">Código: {{ room.code }}</p>
+        </div>
+        <span class="status" [class.archived]="room.status === 'archived'">{{ room.status }}</span>
+      </div>
 
     <div *ngIf="room.status === 'waiting'" class="editor">
       <label for="optionName">Nombres para votar:</label>
       <div class="option-input">
         <input id="optionName" [(ngModel)]="optionName" placeholder="Ej: Equipo A" (keydown.enter)="addOption()" />
-        <button type="button" (click)="addOption()">Anadir</button>
+        <button type="button" (click)="addOption()">Añadir</button>
       </div>
       <p class="hint">Agrega al menos 2 nombres y guarda antes de comenzar.</p>
 
@@ -21,40 +26,41 @@
 
       <div class="action-row">
         <button type="button" (click)="saveOptions()" [disabled]="!hasPendingChanges">Guardar cambios</button>
-        <button type="button" (click)="startVoting()">Comenzar votacion</button>
+        <button type="button" (click)="startVoting()">Comenzar votación</button>
       </div>
     </div>
 
-    <div class="qr-container" *ngIf="qrCodeValue && room.status !== 'closed' && room.status !== 'archived'">
-      <p>Escanea este QR para unirte y votar:</p>
-      <qrcode [qrdata]="qrCodeValue" [width]="200"></qrcode>
-    </div>
+      <div class="qr-container" *ngIf="qrCodeValue && room.status !== 'closed' && room.status !== 'archived'">
+        <p>Escanea este QR para unirte y votar:</p>
+        <qrcode [qrdata]="qrCodeValue" [width]="200"></qrcode>
+      </div>
 
-    <div *ngIf="room.status === 'voting'">
-      <p>Tiempo restante: {{ timeLeft }}</p>
-      <p>Votacion en curso...</p>
-    </div>
+      <div *ngIf="room.status === 'voting'" class="state">
+        <p>Tiempo restante: {{ timeLeft }}</p>
+        <p>Votación en curso...</p>
+      </div>
 
-    <div *ngIf="room.status === 'closed'">
-      <h2>Resultados</h2>
-      <p class="winner">Ganador: {{ winnerLabel }}</p>
-      <p>Total votos: {{ room.totalVotes || 0 }}</p>
-      <ul class="results">
-        <li *ngFor="let item of results">
-          <span class="position">#{{ item.position }}</span>
-          <span class="name">{{ item.name }}</span>
-          <span class="votes">{{ item.votes }} votos</span>
-          <span class="percent">{{ item.percent }}%</span>
-          <div class="bar">
-            <span class="fill" [style.width.%]="item.percent"></span>
-          </div>
-        </li>
-      </ul>
-    </div>
+      <div *ngIf="room.status === 'closed'" class="state">
+        <h2>Resultados</h2>
+        <p class="winner">Ganador: {{ winnerLabel }}</p>
+        <p>Total votos: {{ room.totalVotes || 0 }}</p>
+        <ul class="results">
+          <li *ngFor="let item of results">
+            <span class="position">#{{ item.position }}</span>
+            <span class="name">{{ item.name }}</span>
+            <span class="votes">{{ item.votes }} votos</span>
+            <span class="percent">{{ item.percent }}%</span>
+            <div class="bar">
+              <span class="fill" [style.width.%]="item.percent"></span>
+            </div>
+          </li>
+        </ul>
+      </div>
 
-    <div *ngIf="room.status === 'archived'">
-      <h2>Sala archivada</h2>
-      <p>No se pueden realizar acciones en esta sala.</p>
+      <div *ngIf="room.status === 'archived'" class="state">
+        <h2>Sala archivada</h2>
+        <p>No se pueden realizar acciones en esta sala.</p>
+      </div>
     </div>
   </ng-container>
 </div>
@@ -64,5 +70,5 @@
 </ng-template>
 
 <ng-template #missingTpl>
-  <p>No se encontro la sala.</p>
+  <p>No se encontró la sala.</p>
 </ng-template>

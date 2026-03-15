@@ -2,12 +2,68 @@
   display: block;
 }
 
+.room-page {
+  min-height: 100vh;
+  padding: 28px 20px;
+  box-sizing: border-box;
+  background: radial-gradient(circle at top, #4b2e39 0%, #32021f 45%, #1f0f16 100%);
+  color: #f6fbfc;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.room-card {
+  max-width: 900px;
+  margin: 0 auto;
+  background: rgba(50, 2, 31, 0.88);
+  border-radius: 16px;
+  border: 1px solid rgba(108, 89, 110, 0.4);
+  box-shadow: 0 18px 30px rgba(20, 8, 14, 0.35);
+  padding: 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 12px;
+  color: #c7d4d7;
+  margin-bottom: 6px;
+}
+
 h1 {
-  margin-bottom: 8px;
+  margin: 0 0 6px;
+}
+
+.meta {
+  color: #c7d4d7;
+  margin: 0;
+}
+
+.status {
+  display: inline-flex;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(119, 160, 169, 0.2);
+  text-transform: capitalize;
+  font-weight: 700;
+  color: #e6f1f3;
+}
+
+.status.archived {
+  background: rgba(0, 0, 0, 0.25);
+  color: #c7d4d7;
 }
 
 .editor {
-  margin-top: 12px;
+  margin-top: 6px;
 }
 
 .option-input {
@@ -64,7 +120,14 @@ h1 {
 }
 
 .qr-container {
-  margin-top: 16px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.state {
+  background: rgba(75, 46, 57, 0.35);
+  border-radius: 12px;
+  padding: 14px;
 }
 
 .results {
@@ -83,6 +146,15 @@ h1 {
   background: rgba(75, 46, 57, 0.2);
   border-radius: 8px;
   padding: 8px 10px;
+}
+
+.position {
+  font-weight: 700;
+}
+
+.votes,
+.percent {
+  font-weight: 700;
 }
 
 .winner {
@@ -104,11 +176,21 @@ h1 {
   background: linear-gradient(90deg, #77a0a9, #4b2e39);
 }
 
-.position {
-  font-weight: 700;
-}
+@media (max-width: 700px) {
+  .room-page {
+    padding: 20px 14px;
+  }
 
-.votes,
-.percent {
-  font-weight: 700;
+  .room-card {
+    padding: 18px;
+  }
+
+  .room-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .results li {
+    grid-template-columns: auto 1fr;
+  }
 }

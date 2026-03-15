@@ -22,6 +22,8 @@ export class ResultsComponent {
     )
   );
 
+  private expanded = new Set<string>();
+
   getResults(room: any) {
     if (!room || !Array.isArray(room.options)) return [];
     const votes = room.votes || {};
@@ -48,6 +50,18 @@ export class ResultsComponent {
 
   trackByCode(_: number, room: any) {
     return room?.code;
+  }
+
+  toggleRoom(code: string) {
+    if (this.expanded.has(code)) {
+      this.expanded.delete(code);
+    } else {
+      this.expanded.add(code);
+    }
+  }
+
+  isExpanded(code: string) {
+    return this.expanded.has(code);
   }
 
   private toMillis(value: any) {

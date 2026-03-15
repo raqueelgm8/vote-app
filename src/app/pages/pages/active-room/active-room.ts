@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { QRCodeComponent } from 'angularx-qrcode';
 import { RoomService } from '../../../services/room.service';
+import { Observable } from 'rxjs';
 
 type RoomResult = {
   position: number;
@@ -26,6 +27,7 @@ export class ActiveRoom implements OnInit, OnDestroy {
 
   roomCode = '';
   qrCodeValue = '';
+  room$?: Observable<any>;
   room: any;
   loading = true;
   timeLeft = '';
@@ -46,7 +48,8 @@ export class ActiveRoom implements OnInit, OnDestroy {
           this.roomSub.unsubscribe();
         }
 
-        this.roomSub = this.roomService.getRoomByCode(this.roomCode).subscribe(room => {
+        this.room$ = this.roomService.getRoomByCode(this.roomCode);
+        this.roomSub = this.room$.subscribe(room => {
           this.room = room;
           this.loading = false;
           if (!this.hasPendingChanges) {
@@ -71,7 +74,7 @@ export class ActiveRoom implements OnInit, OnDestroy {
   startVoting() {
     if (!this.roomCode) return;
     if (this.hasPendingChanges) {
-      alert('Guarda los cambios antes de comenzar la votacion.');
+      alert('Guarda los cambios antes de comenzar la votación.');
       return;
     }
 
