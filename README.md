@@ -1,59 +1,115 @@
-# VoteApp
+# Vote App (Poetry Slam La Granja)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.0.
+Aplicación para crear salas de votación con QR, controlar tiempos y mostrar resultados en tiempo real. Pensada para que el admin cree salas, gestione participantes y comparta el QR con los asistentes.
 
-## Development server
+## Descripción del proyecto
 
-To start a local development server, run:
+Vote App permite crear una sala con opciones de voto, definir el tiempo de votación, compartir un QR y ver el ranking final con porcentajes. La experiencia está optimizada tanto para administración en escritorio como para votación desde móvil.
 
-```bash
-ng serve
-```
+## Funcionalidades principales
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Crear salas con nombres de candidatos y duración configurable.
+- Compartir QR o enlace para que los usuarios voten desde móvil.
+- Votación con contador de tiempo y cierre automático.
+- Resultados con ranking y barras de porcentaje.
+- Administración de salas: listar, entrar, archivar.
+- Accesos rápidos tras cerrar una votación (ver resultados / crear sala).
+- Interfaz responsive y estilizada con la identidad visual de la app.
 
-## Code scaffolding
+## Instalación y arranque
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Requisitos
+- Node.js (recomendado 18+)
+- Angular CLI (si quieres usar `ng` directamente)
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+### Instalar dependencias
 
 ```bash
-ng build
+npm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Arrancar en local
 
 ```bash
-ng test
+npm start
 ```
 
-## Running end-to-end tests
+La app se servirá en:
 
-For end-to-end (e2e) testing, run:
+```
+http://localhost:4200
+```
+
+## Tests y coverage
+
+Ejecutar tests:
 
 ```bash
-ng e2e
+& "C:\Program Files\nodejs\npm.cmd" test -- --watch=false --browsers=ChromeHeadless
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Con coverage:
 
-## Additional Resources
+```bash
+& "C:\Program Files\nodejs\npm.cmd" test -- --watch=false --code-coverage --browsers=ChromeHeadless
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+El informe queda en:
+
+```
+coverage/index.html
+```
+
+Nota: en Windows puede ser necesario configurar `CHROME_BIN` si Karma no puede lanzar Chrome.
+
+```bash
+setx CHROME_BIN "C:\Program Files\Google\Chrome\Application\chrome.exe"
+```
+
+## Variables de entorno (Firebase)
+
+Configura Firebase en:
+
+```
+src/environments/environment.ts
+src/environments/environment.prod.ts
+```
+
+Ejemplo mínimo:
+
+```ts
+export const environment = {
+  production: false,
+  firebaseConfig: {
+    apiKey: '...',
+    authDomain: '...',
+    projectId: '...',
+    storageBucket: '...',
+    messagingSenderId: '...',
+    appId: '...'
+  }
+};
+```
+
+Para permitir login desde dominios externos (ngrok), añade el dominio en Firebase Console:
+`Authentication` > `Settings` > `Authorized domains`.
+
+## Despliegue / ngrok
+
+Para probar desde móvil o fuera de la red local:
+
+1. Arranca la app en local:
+   ```bash
+   npm start
+   ```
+
+2. Lanza ngrok:
+   ```bash
+   ngrok http 4200
+   ```
+
+3. Usa la URL HTTPS generada por ngrok.
+
+4. Añade el dominio `*.ngrok-free.dev` en Firebase (dominios autorizados).
+
+Con eso podrás abrir el QR desde cualquier dispositivo.

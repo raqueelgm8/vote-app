@@ -7,12 +7,22 @@ import { Observable } from 'rxjs';
 export class RoomService {
 
   constructor(private firestore: Firestore) { }
+  private docFn = doc;
+  private getDocFn = getDoc;
+  private setDocFn = setDoc;
+  private updateDocFn = updateDoc;
+  private collectionFn = collection;
+  private collectionDataFn = collectionData;
+  private docDataFn = docData;
+  private incrementFn = increment;
+  private nowFn = Timestamp.now;
+  private fromDateFn = Timestamp.fromDate;
 
   async createRoom(name: string, code: string, createdBy: string, options: string[], durationMinutes: number) {
 
-    const roomRef = doc(this.firestore, `rooms/${code}`);
+    const roomRef = this.docFn(this.firestore, `rooms/${code}`);
 
-    const existingRoom = await getDoc(roomRef);
+    const existingRoom = await this.getDocFn(roomRef);
 
     if (existingRoom.exists()) {
       throw new Error('Room code already exists');
@@ -25,7 +35,7 @@ export class RoomService {
 
     const safeDuration = typeof durationMinutes === 'number' && durationMinutes > 0 ? durationMinutes : 3;
 
-    await setDoc(roomRef, {
+    await this.setDocFn(roomRef, {
       name,
       code,
       createdBy,
@@ -34,19 +44,19 @@ export class RoomService {
       votes,
       totalVotes: 0,
       durationMinutes: safeDuration,
-      createdAt: Timestamp.now()
+      createdAt: this.nowFn()
     });
 
   }
 
   getRooms(): Observable<any[]> {
-    const roomsRef = collection(this.firestore, 'rooms');
-    return collectionData(roomsRef, { idField: 'id' }) as Observable<any[]>;
+    const roomsRef = this.collectionFn(this.firestore, 'rooms');
+    return this.collectionDataFn(roomsRef, { idField: 'id' }) as Observable<any[]>;
   }
 
   async startVoting(code: string) {
-    const roomRef = doc(this.firestore, `rooms/${code}`);
-    const snapshot = await getDoc(roomRef);
+    const roomRef = this.docFn(this.firestore, `rooms/${code}`);
+    const snapshot = await this.getDocFn(roomRef);
     if (!snapshot.exists()) {
       throw new Error('Room not found');
     }
@@ -61,10 +71,10 @@ export class RoomService {
     const durationMinutes = typeof data['durationMinutes'] === 'number' && data['durationMinutes'] > 0
       ? data['durationMinutes']
       : 3;
-    const now = Timestamp.now();
-    const endsAt = Timestamp.fromDate(new Date(now.toDate().getTime() + durationMinutes * 60 * 1000));
+    const now = this.nowFn();
+    const endsAt = this.fromDateFn(new Date(now.toDate().getTime() + durationMinutes * 60 * 1000));
 
-    return updateDoc(roomRef, {
+    return this.updateDocFn(roomRef, {
       status: 'voting',
       startedAt: now,
       endsAt,
@@ -74,13 +84,13 @@ export class RoomService {
   }
 
   updateOptions(code: string, options: string[]) {
-    const roomRef = doc(this.firestore, `rooms/${code}`);
+    const roomRef = this.docFn(this.firestore, `rooms/${code}`);
     const votes: Record<string, number> = {};
     options.forEach(option => {
       votes[option] = 0;
     });
 
-    return updateDoc(roomRef, {
+    return this.updateDocFn(roomRef, {
       options,
       votes,
       totalVotes: 0
@@ -88,7 +98,7 @@ export class RoomService {
   }
 
   updateRoomSettings(code: string, options: string[], durationMinutes: number) {
-    const roomRef = doc(this.firestore, `rooms/${code}`);
+    const roomRef = this.docFn(this.firestore, `rooms/${code}`);
     const votes: Record<string, number> = {};
     options.forEach(option => {
       votes[option] = 0;
@@ -96,7 +106,7 @@ export class RoomService {
 
     const safeDuration = typeof durationMinutes === 'number' && durationMinutes > 0 ? durationMinutes : 3;
 
-    return updateDoc(roomRef, {
+    return this.updateDocFn(roomRef, {
       options,
       votes,
       totalVotes: 0,
@@ -105,28 +115,28 @@ export class RoomService {
   }
 
   getRoomByCode(code: string): Observable<any> {
-    const roomRef = doc(this.firestore, `rooms/${code}`);
-    return docData(roomRef, { idField: 'code' }) as Observable<any>;
+    const roomRef = this.docFn(this.firestore, `rooms/${code}`);
+    return this.docDataFn(roomRef, { idField: 'code' }) as Observable<any>;
   }
 
   vote(code: string, option: string) {
-    const roomRef = doc(this.firestore, `rooms/${code}`);
-    return updateDoc(roomRef, {
-      [`votes.${option}`]: increment(1),
-      totalVotes: increment(1)
+    const roomRef = this.docFn(this.firestore, `rooms/${code}`);
+    return this.updateDocFn(roomRef, {
+      [`votes.${option}`]: this.incrementFn(1),
+      totalVotes: this.incrementFn(1)
     });
   }
 
   closeVoting(code: string) {
-    const roomRef = doc(this.firestore, `rooms/${code}`);
-    return updateDoc(roomRef, { status: 'closed' });
+    const roomRef = this.docFn(this.firestore, `rooms/${code}`);
+    return this.updateDocFn(roomRef, { status: 'closed' });
   }
 
   archiveRoom(code: string) {
-    const roomRef = doc(this.firestore, `rooms/${code}`);
-    return updateDoc(roomRef, {
+    const roomRef = this.docFn(this.firestore, `rooms/${code}`);
+    return this.updateDocFn(roomRef, {
       status: 'archived',
-      archivedAt: Timestamp.now()
+      archivedAt: this.nowFn()
     });
   }
 }

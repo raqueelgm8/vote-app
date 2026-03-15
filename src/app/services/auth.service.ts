@@ -6,6 +6,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class AuthService {
   private auth = inject(Auth);
   private adminEmails = ['raquel.guti8@gmail.com', 'silviagutierrezm24@gmail.com'];
+  private signInWithPopupFn = signInWithPopup;
+  private signOutFn = signOut;
 
   private userSubject = new BehaviorSubject<User | null>(null);
   private loadingSubject = new BehaviorSubject(true);
@@ -32,11 +34,11 @@ export class AuthService {
 
   login() {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(this.auth, provider);
+    return this.signInWithPopupFn(this.auth, provider);
   }
 
   logout() {
-    return signOut(this.auth);
+    return this.signOutFn(this.auth);
   }
 
 }
