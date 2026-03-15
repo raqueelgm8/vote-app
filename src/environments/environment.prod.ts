@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: "AIzaSyCi_oV291JXsE0BsgSQBkj7Uy5p1aFoW5g",
+    apiKey: "AIzaSyCDKuiSVFLbh4Yd8h3f1qq-Ly4wZWken_0",
     authDomain: "vote-app-6dc6b.firebaseapp.com",
     projectId: "vote-app-6dc6b",
     storageBucket: "vote-app-6dc6b.firebasestorage.app",
