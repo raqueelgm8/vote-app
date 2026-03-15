@@ -1,1 +1,60 @@
-<p>home works!</p>
+<div class="home">
+  <section class="hero">
+    <div class="hero-content">
+      <p class="eyebrow">Panel de administracion</p>
+      <h1>Gestiona tus votaciones en minutos</h1>
+      <p class="sub">
+        Crea salas, agrega nombres y comparte el QR para empezar a votar.
+      </p>
+      <div class="actions">
+        <a class="btn primary" routerLink="/create-room">Crear sala</a>
+        <a class="btn ghost" routerLink="/rooms">Ver salas</a>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <h2>Flujo rapido</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-number">1</span>
+          <div>
+            <p class="step-title">Crear sala</p>
+            <p class="step-text">Define el nombre y agrega los participantes.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-number">2</span>
+          <div>
+            <p class="step-title">Compartir QR</p>
+            <p class="step-text">Los usuarios entran desde el movil.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-number">3</span>
+          <div>
+            <p class="step-title">Ver resultados</p>
+            <p class="step-text">Se cierran en 3 minutos con ranking.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cards">
+    <div class="card">
+      <h3>Crear nueva sala</h3>
+      <p>Define el nombre y los candidatos antes de iniciar la votacion.</p>
+      <a class="link" routerLink="/create-room">Ir a crear sala</a>
+    </div>
+    <div class="card">
+      <h3>Salas activas</h3>
+      <p>Administra salas, archiva y revisa el estado de cada una.</p>
+      <a class="link" routerLink="/rooms">Ir a salas</a>
+    </div>
+    <div class="card">
+      <h3>Resultados</h3>
+      <p>Consulta el ranking con porcentajes cuando termine la votacion.</p>
+      <a class="link" routerLink="/results">Ver resultados</a>
+    </div>
+  </section>
+</div>

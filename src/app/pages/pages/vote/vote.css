@@ -1,3 +1,122 @@
 :host {
   display: block;
+  min-height: 100vh;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  background: radial-gradient(circle at top, #4b2e39 0%, #32021f 45%, #1f0f16 100%);
+}
+
+.vote-container {
+  max-width: 480px;
+  margin: 20px auto;
+  padding: 24px;
+  border-radius: 14px;
+  background: rgba(50, 2, 31, 0.88);
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  box-shadow: 0 18px 30px rgba(20, 8, 14, 0.35);
+  border: 1px solid rgba(108, 89, 110, 0.4);
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.meta {
+  color: #77a0a9;
+  margin-bottom: 16px;
+}
+
+.timer {
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.voted {
+  margin-bottom: 16px;
+  color: #c7d4d7;
+  background: rgba(108, 89, 110, 0.25);
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.options {
+  display: grid;
+  gap: 10px;
+}
+
+.options button {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #4b2e39;
+  color: #e6f1f3;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.options button:hover {
+  background: #6c596e;
+}
+
+.options button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.results {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 10px;
+}
+
+.results li {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  background: #4b2e39;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #77a0a9;
+  text-align: left;
+}
+
+.winner {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.bar {
+  grid-column: 1 / -1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #77a0a9, #c7d4d7);
+}
+
+.position {
+  font-weight: 700;
+  color: #fff;
+}
+
+.votes,
+.percent {
+  font-weight: 700;
+  color: #fff;
 }

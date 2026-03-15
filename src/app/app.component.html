@@ -1,20 +1,26 @@
-<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
-
-<ng-container *ngIf="!loading()">
-  <ng-container *ngIf="user(); else loginTpl">
-    <ng-container *ngIf="isAdmin(); else noAccessTpl">
-      <app-main></app-main>
-    </ng-container>
-  </ng-container>
-
-  <ng-template #loginTpl>
-    <app-login></app-login>
-  </ng-template>
-
-  <ng-template #noAccessTpl>
-    <div class="no-access-message">
-      <p>No tienes permisos para acceder a esta aplicación.</p>
-      <button (click)="authService.logout()">Cerrar sesión</button>
-    </div>
-  </ng-template>
+<ng-container *ngIf="isJoinRoute(); else adminApp">
+  <router-outlet></router-outlet>
 </ng-container>
+
+<ng-template #adminApp>
+  <app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+  <ng-container *ngIf="!loading()">
+    <ng-container *ngIf="user(); else loginTpl">
+      <ng-container *ngIf="isAdmin(); else noAccessTpl">
+        <app-main></app-main>
+      </ng-container>
+    </ng-container>
+
+    <ng-template #loginTpl>
+      <app-login></app-login>
+    </ng-template>
+
+    <ng-template #noAccessTpl>
+      <div class="no-access-message">
+        <p>No tienes permisos para acceder a esta aplicacion.</p>
+        <button (click)="authService.logout()">Cerrar sesion</button>
+      </div>
+    </ng-template>
+  </ng-container>
+</ng-template>

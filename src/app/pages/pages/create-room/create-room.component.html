@@ -1,21 +1,41 @@
 <div class="container">
-    <h1>Crear Sala de Votación</h1>
+    <h1>Crear Sala de Votacion</h1>
 
-    <label for="voteName">Nombre de la votación:</label>
-    <input id="voteName" [(ngModel)]="votingName" placeholder="Escribe el nombre de la votación" />
+    <label for="voteName">Nombre de la votacion:</label>
+    <input id="voteName" [(ngModel)]="votingName" placeholder="Escribe el nombre de la votacion" />
 
-    <button (click)="createRoom()">🆕 Crear nueva sala</button>
+    <label for="optionName">Nombres para votar:</label>
+    <div class="option-input">
+        <input id="optionName" [(ngModel)]="optionName" placeholder="Ej: Equipo A" (keydown.enter)="addOption()" />
+        <button type="button" (click)="addOption()">Anadir</button>
+    </div>
+    <p class="hint">Agrega al menos 2 nombres para poder crear la sala.</p>
+
+    <ul class="options" *ngIf="options.length">
+        <li *ngFor="let option of options; let i = index">
+            <span>{{ option }}</span>
+            <button type="button" class="ghost" (click)="removeOption(i)">Quitar</button>
+        </li>
+    </ul>
+
+    <button (click)="createRoom()" [disabled]="!canCreateRoom">Crear nueva sala</button>
 
     <div *ngIf="roomCode" class="result">
-        <p><strong>Nombre de votación:</strong> {{ votingName }}</p>
-        <p><strong>Código de sala:</strong> {{ roomCode }}</p>
+        <p><strong>Nombre de votacion:</strong> {{ votingName }}</p>
+        <p><strong>Codigo de sala:</strong> {{ roomCode }}</p>
+        <p><strong>Nombres para votar:</strong></p>
+        <ul class="options readonly">
+            <li *ngFor="let option of options">
+                <span>{{ option }}</span>
+            </li>
+        </ul>
 
         <p>Escanea este QR para compartir la sala:</p>
 
         <div class="flex flex-column">
             <qrcode [qrdata]="qrCodeValue" [width]="200"></qrcode>
 
-            <button (click)="startVoting()">▶️ Comenzar votación</button>
+            <button (click)="startVoting()">Comenzar votacion</button>
         </div>
     </div>
 </div>

@@ -1,4 +1,4 @@
-@import '../../../../styles/variables.scss';
+@use '../../../../styles/variables.scss' as *;
 
 .container {
   max-width: 400px;
@@ -44,6 +44,60 @@ input {
   }
 }
 
+.option-input {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-bottom: 8px;
+
+  input {
+    margin-bottom: 0;
+  }
+
+  button {
+    margin-top: 0;
+    padding: 10px 16px;
+  }
+}
+
+.hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: $slate-gray;
+  text-align: left;
+}
+
+.options {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 16px;
+  text-align: left;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background-color: $eggplant;
+    color: $cadet-gray;
+    margin-bottom: 8px;
+  }
+
+  &.readonly li {
+    justify-content: flex-start;
+  }
+
+  .ghost {
+    background: transparent;
+    border: 1px solid $chinese-violet;
+    color: $cadet-gray;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-top: 0;
+  }
+}
+
 button {
   cursor: pointer;
   background-color: $eggplant;
@@ -63,6 +117,11 @@ button {
     outline: none;
     box-shadow: 0 0 8px $slate-gray;
   }
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .result {

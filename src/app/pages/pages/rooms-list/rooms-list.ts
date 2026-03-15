@@ -34,4 +34,9 @@ export default class RoomsList {
     this.router.navigate(['/active-room'], { queryParams: { code } });
   }
 
+  archiveRoom(code: string) {
+    this.roomService.archiveRoom(code)
+      .catch(err => console.error(err));
+  }
+
 }

@@ -1,0 +1,52 @@
+<div class="vote-container" *ngIf="!loading; else loadingTpl">
+  <ng-container *ngIf="room; else missingTpl">
+    <h1>{{ room.name }}</h1>
+    <p class="meta">Codigo: {{ room.code }}</p>
+
+    <div *ngIf="room.status === 'waiting'" class="state">
+      <p>La votacion aun no ha empezado.</p>
+    </div>
+
+    <div *ngIf="room.status === 'voting'" class="state">
+      <p class="timer">Tiempo restante: {{ timeLeft }}</p>
+      <p *ngIf="hasVoted" class="voted">
+        Ya has votado por: {{ selectedOption }}.
+      </p>
+      <div class="options">
+        <button *ngFor="let option of (room.options || [])" (click)="vote(option)" [disabled]="hasVoted">
+          {{ option }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="room.status === 'closed'" class="state">
+      <h2>Resultados</h2>
+      <p class="winner">Ganador: {{ winnerLabel }}</p>
+      <p class="meta">Total votos: {{ room.totalVotes || 0 }}</p>
+      <ul class="results">
+        <li *ngFor="let item of results">
+          <span class="position">#{{ item.position }}</span>
+          <span class="name">{{ item.name }}</span>
+          <span class="votes">{{ item.votes }} votos</span>
+          <span class="percent">{{ item.percent }}%</span>
+          <div class="bar">
+            <span class="fill" [style.width.%]="item.percent"></span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div *ngIf="room.status === 'archived'" class="state">
+      <h2>Sala archivada</h2>
+      <p>La votacion ya no esta disponible.</p>
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #loadingTpl>
+  <p>Cargando sala...</p>
+</ng-template>
+
+<ng-template #missingTpl>
+  <p>No se encontro la sala.</p>
+</ng-template>

@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/pages/home/home.component';
 import { CreateRoomComponent } from './pages/pages/create-room/create-room.component';
-import { ConfigureVotingComponent } from './pages/pages/configure-voting/configure-voting.component';
 import { ResultsComponent } from './pages/pages/results/results.component';
 import Vote from './pages/pages/vote/vote';
 import RoomsList from './pages/pages/rooms-list/rooms-list';
@@ -12,7 +11,6 @@ export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
   { path: 'create-room', component: CreateRoomComponent },
-  { path: 'configure-voting', component: ConfigureVotingComponent },
   { path: 'results', component: ResultsComponent },
   { path: 'join/:code', component: Vote },
   { path: 'rooms', component: RoomsList },

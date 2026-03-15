@@ -1,3 +1,114 @@
 :host {
   display: block;
 }
+
+h1 {
+  margin-bottom: 8px;
+}
+
+.editor {
+  margin-top: 12px;
+}
+
+.option-input {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin: 10px 0 8px;
+}
+
+.option-input input {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(108, 89, 110, 0.5);
+}
+
+.option-input button {
+  padding: 8px 12px;
+}
+
+.hint {
+  margin: 0 0 12px;
+  color: rgba(108, 89, 110, 0.9);
+}
+
+.options {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 16px;
+}
+
+.options li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(75, 46, 57, 0.2);
+  margin-bottom: 8px;
+}
+
+.options .ghost {
+  background: transparent;
+  border: 1px solid rgba(108, 89, 110, 0.6);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.qr-container {
+  margin-top: 16px;
+}
+
+.results {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.results li {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  background: rgba(75, 46, 57, 0.2);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.winner {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.bar {
+  grid-column: 1 / -1;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #77a0a9, #4b2e39);
+}
+
+.position {
+  font-weight: 700;
+}
+
+.votes,
+.percent {
+  font-weight: 700;
+}

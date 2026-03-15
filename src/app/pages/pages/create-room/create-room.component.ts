@@ -14,27 +14,69 @@ export class CreateRoomComponent {
 
   private roomService = inject(RoomService);
   votingName = '';
+  optionName = '';
+  options: string[] = [];
   roomCode = '';
   qrCodeValue = '';
 
+  get canCreateRoom() {
+    return !!this.votingName.trim() && this.options.length >= 2 && !this.roomCode;
+  }
+
+  addOption() {
+    if (this.roomCode) return;
+
+    const trimmed = this.optionName.trim();
+    if (!trimmed) return;
+
+    const exists = this.options.some(option => option.toLowerCase() === trimmed.toLowerCase());
+    if (exists) {
+      alert('Ese nombre ya existe.');
+      return;
+    }
+
+    this.options = [...this.options, trimmed];
+    this.optionName = '';
+  }
+
+  removeOption(index: number) {
+    if (this.roomCode) return;
+    this.options = this.options.filter((_, i) => i !== index);
+  }
+
   async createRoom() {
 
+    if (this.roomCode) {
+      alert('La sala ya esta creada.');
+      return;
+    }
+
     if (!this.votingName.trim()) {
-      alert('Please enter a voting name.');
+      alert('Escribe un nombre para la votacion.');
+      return;
+    }
+
+    const cleanedOptions = this.options.map(option => option.trim()).filter(Boolean);
+    if (cleanedOptions.length < 2) {
+      alert('Agrega al menos 2 nombres para votar.');
       return;
     }
 
     try {
 
-      this.roomCode = this.generateCode(6);
-
-      this.qrCodeValue = `${window.location.origin}/join/${this.roomCode}`;
+      const code = this.generateCode(6);
+      const qrCode = `${window.location.origin}/join/${code}`;
 
       await this.roomService.createRoom(
-        this.votingName,
-        this.roomCode,
-        'admin'
+        this.votingName.trim(),
+        code,
+        'admin',
+        cleanedOptions
       );
+
+      this.roomCode = code;
+      this.qrCodeValue = qrCode;
+      this.options = cleanedOptions;
 
     } catch (error) {
 
@@ -45,16 +87,18 @@ export class CreateRoomComponent {
 
   }
 
-
-
   startVoting() {
     if (!this.roomCode) {
       alert('Primero crea una sala');
       return;
     }
 
-    alert(`Votación "${this.votingName}" iniciada en sala: ${this.roomCode}`);
-    // Aquí agregas la lógica para iniciar la votación (Firebase, etc)
+    this.roomService.startVoting(this.roomCode)
+      .then(() => alert(`Votacion iniciada en sala: ${this.roomCode}`))
+      .catch(error => {
+        console.error(error);
+        alert('Error iniciando la votacion');
+      });
   }
 
   private generateCode(length: number) {

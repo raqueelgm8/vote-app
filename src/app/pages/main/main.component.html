@@ -21,11 +21,6 @@
             <mat-icon>qr_code</mat-icon>
             <span>Salas</span>
           </mat-list-item>
-          <mat-list-item routerLink="/configure-voting" routerLinkActive="active-link"
-            (click)="isMobile ? drawer.close() : null">
-            <mat-icon>settings</mat-icon>
-            <span>Configurar Votación</span>
-          </mat-list-item>
           <mat-list-item routerLink="/results" routerLinkActive="active-link"
             (click)="isMobile ? drawer.close() : null">
             <mat-icon>bar_chart</mat-icon>
@@ -34,10 +29,10 @@
         </div>
 
         <div class="spacer"></div>
-        <div>
-          <button mat-button color="warn" (click)="logout()" class="logout-btn">
+        <div class="logout-wrapper">
+          <button mat-button (click)="logout()" class="logout-btn">
             <mat-icon>logout</mat-icon>
-            Cerrar sesión
+            Cerrar sesion
           </button>
         </div>
       </div>

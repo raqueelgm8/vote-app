@@ -1,7 +1,117 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  background: radial-gradient(circle at top, #4b2e39 0%, #32021f 45%, #1f0f16 100%);
+  color: #e6f1f3;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: hidden;
+  border-radius: 12px;
+}
+
 table {
   width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 h1 {
   margin-bottom: 20px;
+  color: #fff;
+}
+
+.rooms-table {
+  background: rgba(50, 2, 31, 0.88);
+  border: 1px solid rgba(108, 89, 110, 0.5);
+  box-shadow: 0 18px 30px rgba(20, 8, 14, 0.35);
+  min-width: 0;
+}
+
+.rooms-table th {
+  background: rgba(75, 46, 57, 0.6);
+  color: #e6f1f3;
+  font-weight: 700;
+}
+
+.rooms-table td,
+.rooms-table th {
+  padding: 12px 16px;
+  color: #e6f1f3;
+}
+
+.rooms-table tr.mat-row:hover {
+  background: rgba(108, 89, 110, 0.2);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(108, 89, 110, 0.4);
+  color: #e6f1f3;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status.archived {
+  background: rgba(0, 0, 0, 0.25);
+  color: #c7d4d7;
+}
+
+@media (max-width: 900px) {
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .rooms-table {
+    min-width: 640px;
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    padding: 16px 12px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  .rooms-table td,
+  .rooms-table th {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .rooms-table {
+    min-width: 480px;
+  }
+
+  .rooms-table td,
+  .rooms-table th {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
 }

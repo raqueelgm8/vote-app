@@ -45,8 +45,22 @@ button {
 }
 
 mat-icon {
-  margin-right: 12px;
+  margin-right: 14px;
   vertical-align: middle;
+}
+
+mat-nav-list .mat-mdc-list-item {
+  width: 100%;
+}
+
+mat-nav-list .mat-mdc-list-item .mdc-list-item__content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+mat-nav-list .mat-mdc-list-item .mdc-list-item__primary-text {
+  flex: 1 1 auto;
 }
 
 mat-toolbar button[mat-icon-button] {
@@ -78,8 +92,9 @@ mat-toolbar {
 .main-content {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   height: 100%;
+  overflow: auto;
   padding: 16px;
 }
 
@@ -92,4 +107,16 @@ mat-toolbar {
   width: 100%;
   justify-content: flex-start;
   margin-top: auto;
+  background: rgba(75, 46, 57, 0.3);
+  color: #e6f1f3;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.logout-btn:hover {
+  background: rgba(108, 89, 110, 0.45);
+}
+
+.logout-wrapper {
+  padding: 12px 12px 20px;
 }

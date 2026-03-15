@@ -1,1 +1,61 @@
-<p>results works!</p>
+<div class="results-page">
+  <header class="results-header">
+    <div>
+      <p class="eyebrow">Panel de administracion</p>
+      <h1>Resultados de votaciones</h1>
+      <p class="sub">Listado de salas cerradas y archivadas con sus porcentajes finales.</p>
+    </div>
+    <a class="btn ghost" routerLink="/rooms">Volver a salas</a>
+  </header>
+
+  <section *ngIf="rooms$ | async as rooms">
+    <div *ngIf="!rooms.length" class="empty">
+      <h2>Sin resultados aun</h2>
+      <p>Cuando una sala termine, veras aqui su ranking.</p>
+      <a class="btn primary" routerLink="/create-room">Crear sala</a>
+    </div>
+
+    <div class="grid" *ngIf="rooms.length">
+      <article class="card" *ngFor="let room of rooms; trackBy: trackByCode">
+        <div class="card-header">
+          <div>
+            <h2>{{ room.name }}</h2>
+            <p class="meta">Codigo: {{ room.code }}</p>
+          </div>
+          <span class="status" [class.archived]="room.status === 'archived'">{{ room.status }}</span>
+        </div>
+
+        <div class="summary">
+          <div>
+            <p class="label">Ganador</p>
+            <p class="value">{{ getWinner(room) }}</p>
+          </div>
+          <div>
+            <p class="label">Total votos</p>
+            <p class="value">{{ room.totalVotes || 0 }}</p>
+          </div>
+        </div>
+
+        <ul class="results-list">
+          <li *ngFor="let item of getResults(room)">
+            <div class="row">
+              <span class="position">#{{ item.position }}</span>
+              <span class="name">{{ item.name }}</span>
+              <span class="votes">{{ item.votes }} votos</span>
+              <span class="percent">{{ item.percent }}%</span>
+            </div>
+            <div class="bar">
+              <span class="fill" [style.width.%]="item.percent"></span>
+            </div>
+          </li>
+        </ul>
+
+        <div class="actions">
+          <a class="btn ghost" [routerLink]="['/active-room']" [queryParams]="{ code: room.code }">
+            Ver sala
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
