@@ -87,6 +87,23 @@ export class RoomService {
     });
   }
 
+  updateRoomSettings(code: string, options: string[], durationMinutes: number) {
+    const roomRef = doc(this.firestore, `rooms/${code}`);
+    const votes: Record<string, number> = {};
+    options.forEach(option => {
+      votes[option] = 0;
+    });
+
+    const safeDuration = typeof durationMinutes === 'number' && durationMinutes > 0 ? durationMinutes : 3;
+
+    return updateDoc(roomRef, {
+      options,
+      votes,
+      totalVotes: 0,
+      durationMinutes: safeDuration
+    });
+  }
+
   getRoomByCode(code: string): Observable<any> {
     const roomRef = doc(this.firestore, `rooms/${code}`);
     return docData(roomRef, { idField: 'code' }) as Observable<any>;

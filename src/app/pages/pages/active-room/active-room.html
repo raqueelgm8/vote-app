@@ -41,6 +41,20 @@
             <input id="optionName" [(ngModel)]="optionName" placeholder="Ej: Equipo A" (keydown.enter)="addOption()" />
             <button type="button" class="primary" (click)="addOption()">Añadir</button>
           </div>
+          <div class="duration-row">
+            <label for="durationMinutes">Minutos de votación</label>
+            <div class="duration-input">
+              <input
+                id="durationMinutes"
+                type="number"
+                min="1"
+                step="1"
+                [ngModel]="durationDraft"
+                (ngModelChange)="onDurationChange($event)"
+              />
+              <span class="duration-suffix">min</span>
+            </div>
+          </div>
           <p class="hint">Agrega al menos 2 nombres y guarda antes de comenzar.</p>
 
           <ul class="options" *ngIf="optionsDraft.length">
@@ -64,9 +78,15 @@
             <span class="timer-pill">{{ timeLeft }}</span>
           </div>
           <p>La sala se cerrará automáticamente cuando termine el tiempo.</p>
+          <div class="options-preview" *ngIf="room.options?.length">
+            <p class="preview-title">Opciones en votación</p>
+            <ul>
+              <li *ngFor="let option of room.options">{{ option }}</li>
+            </ul>
+          </div>
         </section>
 
-        <section *ngIf="room.status === 'closed'" class="panel state">
+        <section *ngIf="room.status === 'closed'" class="panel state results-panel">
           <div class="panel-head">
             <h2>Resultados finales</h2>
             <span class="winner-pill">Ganador: {{ winnerLabel }}</span>
@@ -83,6 +103,10 @@
               </div>
             </li>
           </ul>
+          <div class="quick-actions">
+            <a class="ghost" routerLink="/results">Ver resultados</a>
+            <a class="primary" routerLink="/create-room">Crear otra sala</a>
+          </div>
         </section>
 
         <section *ngIf="room.status === 'archived'" class="panel state">
@@ -98,6 +122,10 @@
           <p>Escanea con el móvil para entrar en la votación.</p>
           <div class="qr-code">
             <qrcode [qrdata]="qrCodeValue" [width]="220"></qrcode>
+          </div>
+          <div class="qr-actions">
+            <button type="button" class="ghost" (click)="copyQrLink()">Copiar enlace</button>
+            <button type="button" class="primary" (click)="shareQrLink()">Compartir</button>
           </div>
           <p class="hint">Este código se desactivará al cerrar la votación.</p>
         </section>

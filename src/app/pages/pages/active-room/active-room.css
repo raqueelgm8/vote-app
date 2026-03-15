@@ -156,8 +156,44 @@ h2 {
   gap: 12px;
 }
 
+.results-panel {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 720px);
+}
+
 .panel.state {
   align-content: start;
+}
+
+.options-preview {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(17, 11, 14, 0.45);
+  border: 1px solid rgba(108, 89, 110, 0.4);
+}
+
+.options-preview ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 6px;
+}
+
+.options-preview li {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(75, 46, 57, 0.25);
+}
+
+.preview-title {
+  margin: 0;
+  font-weight: 700;
+  color: #c7d4d7;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .panel-head {
@@ -197,6 +233,38 @@ h2 {
   gap: 10px;
   align-items: stretch;
   margin-top: 6px;
+}
+
+.duration-row {
+  display: grid;
+  gap: 6px;
+}
+
+.duration-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(108, 89, 110, 0.5);
+  background: rgba(17, 11, 14, 0.6);
+}
+
+.duration-input input {
+  width: 72px;
+  padding: 6px 4px;
+  border: none;
+  background: transparent;
+  color: #f6fbfc;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.duration-suffix {
+  color: rgba(199, 212, 215, 0.8);
+  font-size: 13px;
 }
 
 .option-input input {
@@ -248,6 +316,27 @@ button.ghost {
   color: #f6fbfc;
 }
 
+a.primary,
+a.ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+a.primary {
+  background: #77a0a9;
+  color: #1f0f16;
+}
+
+a.ghost {
+  border: 1px solid rgba(108, 89, 110, 0.7);
+  color: #f6fbfc;
+}
+
 .options {
   list-style: none;
   padding: 0;
@@ -280,6 +369,13 @@ button.ghost {
   display: flex;
   justify-content: center;
   padding: 8px 0;
+}
+
+.qr-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .results {
@@ -318,6 +414,13 @@ button.ghost {
   display: block;
   height: 100%;
   background: linear-gradient(90deg, #77a0a9, #4b2e39);
+}
+
+.quick-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 900px) {

@@ -33,6 +33,7 @@ export class ActiveRoom implements OnInit, OnDestroy {
   timeLeft = '';
   optionName = '';
   optionsDraft: string[] = [];
+  durationDraft = 3;
   hasPendingChanges = false;
   notice: { type: 'error' | 'success' | 'info'; text: string } | null = null;
   @ViewChild('noticeEl') noticeEl?: ElementRef<HTMLElement>;
@@ -57,6 +58,7 @@ export class ActiveRoom implements OnInit, OnDestroy {
           this.loading = false;
           if (!this.hasPendingChanges) {
             this.optionsDraft = Array.isArray(room?.options) ? [...room.options] : [];
+            this.durationDraft = this.normalizeDuration(room?.durationMinutes);
           }
           this.updateTimer();
           this.cdr.markForCheck();
@@ -88,6 +90,28 @@ export class ActiveRoom implements OnInit, OnDestroy {
       .catch(err => console.error(err));
   }
 
+  shareQrLink() {
+    if (!this.qrCodeValue) return;
+    if (navigator.share) {
+      navigator.share({
+        title: this.room?.name ? `Vota en ${this.room.name}` : 'Vota en la sala',
+        text: 'Entra desde este enlace para votar.',
+        url: this.qrCodeValue
+      }).catch(() => {
+        this.copyQrLink();
+      });
+      return;
+    }
+    this.copyQrLink();
+  }
+
+  copyQrLink() {
+    if (!this.qrCodeValue) return;
+    navigator.clipboard?.writeText(this.qrCodeValue)
+      .then(() => this.setNotice('success', 'Enlace copiado.'))
+      .catch(() => this.setNotice('error', 'No se pudo copiar el enlace.'));
+  }
+
   addOption() {
     if (!this.room || this.room.status !== 'waiting') return;
 
@@ -105,6 +129,12 @@ export class ActiveRoom implements OnInit, OnDestroy {
     this.hasPendingChanges = true;
   }
 
+  onDurationChange(value: string | number) {
+    const parsed = typeof value === 'number' ? value : Number.parseInt(value, 10);
+    this.durationDraft = this.normalizeDuration(parsed);
+    this.hasPendingChanges = true;
+  }
+
   removeOption(index: number) {
     if (!this.room || this.room.status !== 'waiting') return;
     this.optionsDraft = this.optionsDraft.filter((_, i) => i !== index);
@@ -119,9 +149,12 @@ export class ActiveRoom implements OnInit, OnDestroy {
       return;
     }
 
-    this.roomService.updateOptions(this.roomCode, cleaned)
+    const safeDuration = this.normalizeDuration(this.durationDraft);
+
+    this.roomService.updateRoomSettings(this.roomCode, cleaned, safeDuration)
       .then(() => {
         this.optionsDraft = cleaned;
+        this.durationDraft = safeDuration;
         this.hasPendingChanges = false;
         this.setNotice('success', 'Cambios guardados.');
         this.cdr.markForCheck();
@@ -213,6 +246,16 @@ export class ActiveRoom implements OnInit, OnDestroy {
       this.notice = null;
       this.cdr.markForCheck();
     }, 4500);
+  }
+
+  private normalizeDuration(value: number | undefined | null): number {
+    if (value === undefined || value === null) {
+      return 3;
+    }
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+      return Math.floor(value);
+    }
+    return 1;
   }
 
   statusLabel(status: string): string {

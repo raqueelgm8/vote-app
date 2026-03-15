@@ -5,7 +5,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private auth = inject(Auth);
-  private adminEmail = 'raquel.guti8@gmail.com';
+  private adminEmails = ['raquel.guti8@gmail.com', 'silviagutierrezm24@gmail.com'];
 
   private userSubject = new BehaviorSubject<User | null>(null);
   private loadingSubject = new BehaviorSubject(true);
@@ -19,7 +19,8 @@ export class AuthService {
     this.auth.onAuthStateChanged(user => {
       this.userSubject.next(user);
       if (user) {
-        const isAdmin = (user.email || '').toLowerCase() === this.adminEmail;
+        const email = (user.email || '').toLowerCase();
+        const isAdmin = this.adminEmails.includes(email);
         this.isAdminSubject.next(isAdmin);
         this.loadingSubject.next(false);
       } else {
