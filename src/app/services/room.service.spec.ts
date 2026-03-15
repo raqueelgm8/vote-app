@@ -55,6 +55,30 @@ describe('RoomService', () => {
     }));
   });
 
+  it('createRoom keeps positive duration', async () => {
+    const docRef = { id: 'POS' } as any;
+    const now = { toDate: () => new Date('2024-01-01T00:00:00Z') };
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
+    serviceAny.nowFn.and.returnValue(now as any);
+
+    await service.createRoom('Sala', 'POS', 'admin', ['A'], 7);
+
+    const setArgs = serviceAny.setDocFn.calls.mostRecent().args;
+    expect(setArgs[1]).toEqual(jasmine.objectContaining({ durationMinutes: 7 }));
+  });
+
+  it('createRoom defaults duration when not a number', async () => {
+    const docRef = { id: 'NAN' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
+
+    await service.createRoom('Sala', 'NAN', 'admin', ['A'], Number.NaN);
+
+    const setArgs = serviceAny.setDocFn.calls.mostRecent().args;
+    expect(setArgs[1]).toEqual(jasmine.objectContaining({ durationMinutes: 3 }));
+  });
+
   it('getRooms returns collectionData stream', async () => {
     const collectionRef = { id: 'rooms' } as any;
     serviceAny.collectionFn.and.returnValue(collectionRef);
@@ -99,6 +123,48 @@ describe('RoomService', () => {
     }));
   });
 
+  it('startVoting throws when room not found', async () => {
+    const docRef = { id: 'MISSING' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
+
+    await expectAsync(service.startVoting('MISSING')).toBeRejected();
+  });
+
+  it('startVoting falls back to 3 minutes when duration invalid', async () => {
+    const docRef = { id: 'DUR' } as any;
+    const now = { toDate: () => new Date('2024-01-01T00:00:00Z') };
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({
+      exists: () => true,
+      data: () => ({ options: ['A'] })
+    } as any);
+    serviceAny.nowFn.and.returnValue(now as any);
+    serviceAny.fromDateFn.and.callFake((date: Date) => ({ date } as any));
+
+    await service.startVoting('DUR');
+
+    const fromDateArgs = serviceAny.fromDateFn.calls.mostRecent().args;
+    expect(fromDateArgs[0].getTime()).toBe(now.toDate().getTime() + 3 * 60 * 1000);
+  });
+
+  it('startVoting handles non-array options', async () => {
+    const docRef = { id: 'NOOPTS' } as any;
+    const now = { toDate: () => new Date('2024-01-01T00:00:00Z') };
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({
+      exists: () => true,
+      data: () => ({ options: 'A', durationMinutes: 1 })
+    } as any);
+    serviceAny.nowFn.and.returnValue(now as any);
+    serviceAny.fromDateFn.and.callFake((date: Date) => ({ date } as any));
+
+    await service.startVoting('NOOPTS');
+
+    const updateArgs = serviceAny.updateDocFn.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({ votes: {} }));
+  });
+
   it('updateOptions updates votes and totalVotes', async () => {
     const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
@@ -111,6 +177,21 @@ describe('RoomService', () => {
     expect(updateArgs[1]).toEqual(jasmine.objectContaining({
       options: ['A', 'B'],
       votes: { A: 0, B: 0 },
+      totalVotes: 0
+    }));
+  });
+
+  it('updateOptions handles empty options', async () => {
+    const docRef = { id: 'EMPTY' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.updateOptions('EMPTY', []);
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      options: [],
+      votes: {},
       totalVotes: 0
     }));
   });
@@ -131,6 +212,28 @@ describe('RoomService', () => {
       totalVotes: 0,
       durationMinutes: 5
     }));
+  });
+
+  it('updateRoomSettings defaults duration when invalid', async () => {
+    const docRef = { id: 'INVALID' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.updateRoomSettings('INVALID', ['A'], 0);
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({ durationMinutes: 3 }));
+  });
+
+  it('updateRoomSettings keeps valid duration', async () => {
+    const docRef = { id: 'VALID' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.updateRoomSettings('VALID', ['A'], 2);
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({ durationMinutes: 2 }));
   });
 
   it('vote increments counts', async () => {

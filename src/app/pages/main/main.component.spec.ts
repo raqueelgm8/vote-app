@@ -32,6 +32,18 @@ describe('MainComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('calls checkScreen on init', () => {
+    const spy = spyOn(component, 'checkScreen');
+    component.ngOnInit();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('calls checkScreen on resize', () => {
+    const spy = spyOn(component, 'checkScreen');
+    component.onResize();
+    expect(spy).toHaveBeenCalled();
+  });
+
   it('sets mobile mode and closes sidenav on small screens', () => {
     const originalWidth = window.innerWidth;
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 500 });
