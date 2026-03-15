@@ -32,7 +32,7 @@ import { ChangeDetectorRef } from '@angular/core';
         intl.nextPageLabel = 'Siguiente';
         intl.previousPageLabel = 'Anterior';
         intl.firstPageLabel = 'Primera';
-        intl.lastPageLabel = 'Ultima';
+        intl.lastPageLabel = 'Última';
         intl.getRangeLabel = (page, pageSize, length) => {
           if (length === 0 || pageSize === 0) {
             return `0 de ${length}`;
@@ -60,7 +60,7 @@ export default class RoomsList implements OnInit, OnDestroy {
   pageIndex = 0;
   pageSizeOptions = [5, 10, 15, 20];
 
-  displayedColumns: string[] = ['name', 'code', 'status', 'actions'];
+  displayedColumns: string[] = ['name', 'code', 'createdAt', 'status', 'actions'];
 
   ngOnInit(): void {
     this.sub = this.roomService.getRooms().subscribe(rooms => {
@@ -95,6 +95,14 @@ export default class RoomsList implements OnInit, OnDestroy {
   private updatePagedRooms() {
     const start = this.pageIndex * this.pageSize;
     this.pagedRooms = this.rooms.slice(start, start + this.pageSize);
+  }
+
+  getCreatedAt(room: any): Date | null {
+    const value = room?.createdAt;
+    if (!value) return null;
+    if (value?.toDate) return value.toDate();
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 
 }

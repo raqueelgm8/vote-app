@@ -19,6 +19,48 @@
   border: 1px solid rgba(108, 89, 110, 0.4);
 }
 
+.loading-state {
+  max-width: 420px;
+  margin: 24px auto 0;
+  padding: 24px;
+  border-radius: 14px;
+  background: rgba(50, 2, 31, 0.88);
+  border: 1px solid rgba(108, 89, 110, 0.4);
+  color: #e6f1f3;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 18px 30px rgba(20, 8, 14, 0.35);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(119, 160, 169, 0.25);
+  border-top-color: #77a0a9;
+  animation: spin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+.loading-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.loading-subtitle {
+  margin: 4px 0 0;
+  color: #c7d4d7;
+  font-size: 14px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 h1 {
   margin: 0 0 8px;
   font-weight: 700;

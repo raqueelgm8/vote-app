@@ -56,7 +56,13 @@
 </div>
 
 <ng-template #loadingTpl>
-  <p>Cargando sala...</p>
+  <div class="loading-state">
+    <span class="spinner" aria-hidden="true"></span>
+    <div>
+      <p class="loading-title">Cargando sala</p>
+      <p class="loading-subtitle">Estamos preparando la votación para ti.</p>
+    </div>
+  </div>
 </ng-template>
 
 <ng-template #missingTpl>

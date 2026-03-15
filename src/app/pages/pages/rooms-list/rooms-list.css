@@ -48,7 +48,7 @@ h1 {
 
 .rooms-table th:last-child,
 .rooms-table td:last-child {
-  width: 260px;
+  width: 240px;
 }
 
 .rooms-table th:nth-child(2),
@@ -58,6 +58,11 @@ h1 {
 
 .rooms-table th:nth-child(3),
 .rooms-table td:nth-child(3) {
+  width: 170px;
+}
+
+.rooms-table th:nth-child(4),
+.rooms-table td:nth-child(4) {
   width: 120px;
 }
 
