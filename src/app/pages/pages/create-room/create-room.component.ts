@@ -18,16 +18,33 @@ export class CreateRoomComponent {
   qrCodeValue = '';
 
   async createRoom() {
+
     if (!this.votingName.trim()) {
       alert('Please enter a voting name.');
       return;
     }
 
-    this.roomCode = this.generateCode(6);
-    this.qrCodeValue = `https://yourapp.com/join/${this.roomCode}`;
+    try {
 
-    await this.roomService.createRoom(this.votingName, this.roomCode, 'admin-placeholder');
+      this.roomCode = this.generateCode(6);
+
+      this.qrCodeValue = `${window.location.origin}/join/${this.roomCode}`;
+
+      await this.roomService.createRoom(
+        this.votingName,
+        this.roomCode,
+        'admin'
+      );
+
+    } catch (error) {
+
+      alert('Error creando la sala');
+      console.error(error);
+
+    }
+
   }
+
 
 
   startVoting() {

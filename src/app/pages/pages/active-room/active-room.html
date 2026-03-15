@@ -1,0 +1,30 @@
+<div *ngIf="room$ | async as room; else loading">
+
+  <h1>Sala: {{ room.name }}</h1>
+  <p>Código: {{ room.code }}</p>
+  <p>Estado: {{ room.status }}</p>
+
+  <!-- Botón para iniciar votación -->
+  <button *ngIf="room.status === 'waiting'" (click)="startVoting()">
+    ▶️ Comenzar votación
+  </button>
+
+  <!-- QR para que los votantes se unan -->
+  <div class="qr-container" *ngIf="qrCodeValue">
+    <p>Escanea este QR para unirte y votar:</p>
+    <qrcode [qrdata]="qrCodeValue" [width]="200"></qrcode>
+  </div>
+
+  <div *ngIf="room.status === 'voting'">
+    <p>Votación en curso...</p>
+  </div>
+
+  <div *ngIf="room.status === 'closed'">
+    <p>Votación cerrada. <a routerLink="/results?code={{room.code}}">Ver resultados</a></p>
+  </div>
+
+</div>
+
+<ng-template #loading>
+  <p>Cargando sala...</p>
+</ng-template>

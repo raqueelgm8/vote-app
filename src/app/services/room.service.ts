@@ -1,43 +1,45 @@
 import { Injectable } from '@angular/core';
-import {
-  Firestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  writeBatch
-} from '@angular/fire/firestore';
-import { Timestamp, CollectionReference, DocumentData } from 'firebase/firestore';
+import { Firestore, doc, setDoc, getDoc, collectionData, docData } from '@angular/fire/firestore';
+import { collection, Timestamp, updateDoc } from 'firebase/firestore';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class RoomService {
-  private roomsRef: CollectionReference<DocumentData>;
 
-  constructor(private firestore: Firestore) {
-    this.roomsRef = collection(this.firestore, 'rooms');
-  }
+  constructor(private firestore: Firestore) { }
 
   async createRoom(name: string, code: string, createdBy: string) {
-    // Step 1: Deactivate previous active room(s)
-    const q = query(this.roomsRef, where('active', '==', true));
-    const snapshot = await getDocs(q);
 
-    const batch = writeBatch(this.firestore);
-    snapshot.forEach((docSnap) => {
-      batch.update(docSnap.ref, { active: false });
-    });
-    await batch.commit();
+    const roomRef = doc(this.firestore, `rooms/${code}`);
 
-    // Step 2: Add the new room and mark it active
-    const newRoom = {
+    const existingRoom = await getDoc(roomRef);
+
+    if (existingRoom.exists()) {
+      throw new Error('Room code already exists');
+    }
+
+    await setDoc(roomRef, {
       name,
       code,
       createdBy,
-      active: true,
-      timestamp: Timestamp.now(),
-    };
+      status: 'waiting',
+      createdAt: Timestamp.now()
+    });
 
-    await addDoc(this.roomsRef, newRoom);
+  }
+
+  getRooms(): Observable<any[]> {
+    const roomsRef = collection(this.firestore, 'rooms');
+    return collectionData(roomsRef, { idField: 'id' }) as Observable<any[]>;
+  }
+
+  startVoting(code: string) {
+    const roomRef = doc(this.firestore, `rooms/${code}`);
+    return updateDoc(roomRef, { status: 'voting' });
+  }
+
+  getRoomByCode(code: string): Observable<any> {
+    const roomRef = doc(this.firestore, `rooms/${code}`);
+    return docData(roomRef, { idField: 'code' }) as Observable<any>;
   }
 }
