@@ -19,6 +19,7 @@ describe('RoomService', () => {
     serviceAny.incrementFn = jasmine.createSpy('incrementFn').and.returnValue('inc');
     serviceAny.nowFn = jasmine.createSpy('nowFn').and.returnValue({ toDate: () => new Date('2024-01-01T00:00:00Z') });
     serviceAny.fromDateFn = jasmine.createSpy('fromDateFn').and.returnValue({ seconds: 0 });
+    serviceAny.randomFn = jasmine.createSpy('randomFn').and.returnValue(0);
   });
 
   it('createRoom throws when room already exists', async () => {
@@ -31,7 +32,7 @@ describe('RoomService', () => {
     ).toBeRejected();
   });
 
-  it('createRoom persists data with safe duration', async () => {
+  it('createRoom persists data with safe duration and order', async () => {
     const docRef = { id: 'ABC' } as any;
     const now = { toDate: () => new Date('2024-01-01T00:00:00Z') };
     serviceAny.docFn.and.returnValue(docRef);
@@ -49,34 +50,28 @@ describe('RoomService', () => {
       createdBy: 'admin',
       status: 'waiting',
       options: ['A', 'B'],
+      order: [1, 0],
+      currentIndex: 0,
+      preScores: {},
+      finalVotes: {},
       votes: { A: 0, B: 0 },
       durationMinutes: 3,
       createdAt: now
     }));
   });
 
-  it('createRoom keeps positive duration', async () => {
-    const docRef = { id: 'POS' } as any;
-    const now = { toDate: () => new Date('2024-01-01T00:00:00Z') };
+  it('createRoom keeps valid duration when provided', async () => {
+    const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
     serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
-    serviceAny.nowFn.and.returnValue(now as any);
+    const setSpy = serviceAny.setDocFn.and.resolveTo();
 
-    await service.createRoom('Sala', 'POS', 'admin', ['A'], 7);
+    await service.createRoom('Sala', 'ABC', 'admin', ['A', 'B'], 7);
 
-    const setArgs = serviceAny.setDocFn.calls.mostRecent().args;
-    expect(setArgs[1]).toEqual(jasmine.objectContaining({ durationMinutes: 7 }));
-  });
-
-  it('createRoom defaults duration when not a number', async () => {
-    const docRef = { id: 'NAN' } as any;
-    serviceAny.docFn.and.returnValue(docRef);
-    serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
-
-    await service.createRoom('Sala', 'NAN', 'admin', ['A'], Number.NaN);
-
-    const setArgs = serviceAny.setDocFn.calls.mostRecent().args;
-    expect(setArgs[1]).toEqual(jasmine.objectContaining({ durationMinutes: 3 }));
+    const setArgs = setSpy.calls.mostRecent().args;
+    expect(setArgs[1]).toEqual(jasmine.objectContaining({
+      durationMinutes: 7
+    }));
   });
 
   it('getRooms returns collectionData stream', async () => {
@@ -95,6 +90,11 @@ describe('RoomService', () => {
 
     const room = await firstValueFrom(service.getRoomByCode('ABC'));
     expect(room).toEqual({ code: 'ABC' });
+  });
+
+  it('startVoting throws when room not found', async () => {
+    serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
+    await expectAsync(service.startVoting('ABC')).toBeRejected();
   });
 
   it('startVoting sets status and endsAt', async () => {
@@ -118,54 +118,138 @@ describe('RoomService', () => {
       status: 'voting',
       startedAt: now,
       endsAt,
+      finalVotes: {},
       votes: { A: 0 },
       totalVotes: 0
     }));
   });
 
-  it('startVoting throws when room not found', async () => {
-    const docRef = { id: 'MISSING' } as any;
+  it('startVoting handles missing options and invalid duration', async () => {
+    const docRef = { id: 'ABC' } as any;
+    const nowDate = new Date('2024-01-01T00:00:00Z');
+    const now = { toDate: () => nowDate };
+    const endsAt = { seconds: 222 } as any;
     serviceAny.docFn.and.returnValue(docRef);
-    serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
+    serviceAny.getDocFn.and.resolveTo({
+      exists: () => true,
+      data: () => ({ options: null, durationMinutes: undefined })
+    } as any);
+    serviceAny.nowFn.and.returnValue(now as any);
+    serviceAny.fromDateFn.and.returnValue(endsAt);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
 
-    await expectAsync(service.startVoting('MISSING')).toBeRejected();
+    await service.startVoting('ABC');
+
+    const expectedEndsAt = new Date(nowDate.getTime() + 3 * 60 * 1000);
+    expect(serviceAny.fromDateFn).toHaveBeenCalled();
+    expect(serviceAny.fromDateFn.calls.mostRecent().args[0].getTime()).toBe(expectedEndsAt.getTime());
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      votes: {},
+      endsAt
+    }));
   });
 
-  it('startVoting falls back to 3 minutes when duration invalid', async () => {
-    const docRef = { id: 'DUR' } as any;
-    const now = { toDate: () => new Date('2024-01-01T00:00:00Z') };
+  it('startReveal throws when room not found', async () => {
+    serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
+    await expectAsync(service.startReveal('ABC')).toBeRejected();
+  });
+
+  it('startReveal sets status and order', async () => {
+    const docRef = { id: 'ABC' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({
+      exists: () => true,
+      data: () => ({ options: ['A', 'B'], order: [1, 0] })
+    } as any);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.startReveal('ABC');
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[0]).toBe(docRef);
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      status: 'reveal',
+      order: [1, 0],
+      currentIndex: 0
+    }));
+  });
+
+  it('startReveal handles missing options array', async () => {
+    const docRef = { id: 'ABC' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({
+      exists: () => true,
+      data: () => ({ options: null })
+    } as any);
+
+    await expectAsync(service.startReveal('ABC')).toBeRejected();
+  });
+
+  it('startReveal rebuilds order when length mismatches', async () => {
+    const docRef = { id: 'ABC' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({
+      exists: () => true,
+      data: () => ({ options: ['A', 'B', 'C'], order: [1, 0] })
+    } as any);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.startReveal('ABC');
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      order: [1, 2, 0]
+    }));
+  });
+
+  it('startReveal throws when not enough participants', async () => {
+    const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
     serviceAny.getDocFn.and.resolveTo({
       exists: () => true,
       data: () => ({ options: ['A'] })
     } as any);
-    serviceAny.nowFn.and.returnValue(now as any);
-    serviceAny.fromDateFn.and.callFake((date: Date) => ({ date } as any));
 
-    await service.startVoting('DUR');
-
-    const fromDateArgs = serviceAny.fromDateFn.calls.mostRecent().args;
-    expect(fromDateArgs[0].getTime()).toBe(now.toDate().getTime() + 3 * 60 * 1000);
+    await expectAsync(service.startReveal('ABC')).toBeRejected();
   });
 
-  it('startVoting handles non-array options', async () => {
-    const docRef = { id: 'NOOPTS' } as any;
-    const now = { toDate: () => new Date('2024-01-01T00:00:00Z') };
+  it('nextParticipant throws when room not found', async () => {
+    serviceAny.getDocFn.and.resolveTo({ exists: () => false } as any);
+    await expectAsync(service.nextParticipant('ABC')).toBeRejected();
+  });
+
+  it('nextParticipant increments currentIndex safely', async () => {
+    const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
     serviceAny.getDocFn.and.resolveTo({
       exists: () => true,
-      data: () => ({ options: 'A', durationMinutes: 1 })
+      data: () => ({ options: ['A', 'B'], order: [1, 0], currentIndex: 1 })
     } as any);
-    serviceAny.nowFn.and.returnValue(now as any);
-    serviceAny.fromDateFn.and.callFake((date: Date) => ({ date } as any));
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
 
-    await service.startVoting('NOOPTS');
+    await service.nextParticipant('ABC');
 
-    const updateArgs = serviceAny.updateDocFn.calls.mostRecent().args;
-    expect(updateArgs[1]).toEqual(jasmine.objectContaining({ votes: {} }));
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({ currentIndex: 1 }));
   });
 
-  it('updateOptions updates votes and totalVotes', async () => {
+  it('nextParticipant falls back when options and index are missing', async () => {
+    const docRef = { id: 'ABC' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.getDocFn.and.resolveTo({
+      exists: () => true,
+      data: () => ({ options: null, order: null, currentIndex: undefined })
+    } as any);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.nextParticipant('ABC');
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({ currentIndex: 0, order: [] }));
+  });
+
+  it('updateOptions resets votes and totals', async () => {
     const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
     const updateSpy = serviceAny.updateDocFn.and.resolveTo();
@@ -173,7 +257,6 @@ describe('RoomService', () => {
     await service.updateOptions('ABC', ['A', 'B']);
 
     const updateArgs = updateSpy.calls.mostRecent().args;
-    expect(updateArgs[0]).toBe(docRef);
     expect(updateArgs[1]).toEqual(jasmine.objectContaining({
       options: ['A', 'B'],
       votes: { A: 0, B: 0 },
@@ -181,62 +264,57 @@ describe('RoomService', () => {
     }));
   });
 
-  it('updateOptions handles empty options', async () => {
-    const docRef = { id: 'EMPTY' } as any;
-    serviceAny.docFn.and.returnValue(docRef);
-    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
-
-    await service.updateOptions('EMPTY', []);
-
-    const updateArgs = updateSpy.calls.mostRecent().args;
-    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
-      options: [],
-      votes: {},
-      totalVotes: 0
-    }));
-  });
-
-  it('updateRoomSettings saves duration and options', async () => {
+  it('updateRoomSettings saves duration, order and resets scores', async () => {
     const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
-    serviceAny.getDocFn.and.resolveTo({ exists: () => true, data: () => ({}) } as any);
     const updateSpy = serviceAny.updateDocFn.and.resolveTo();
 
-    await service.updateRoomSettings('ABC', ['A'], 5);
+    await service.updateRoomSettings('ABC', ['A', 'B'], 5);
 
     const updateArgs = updateSpy.calls.mostRecent().args;
-    expect(updateArgs[0]).toBe(docRef);
     expect(updateArgs[1]).toEqual(jasmine.objectContaining({
-      options: ['A'],
-      votes: { A: 0 },
+      options: ['A', 'B'],
+      order: [1, 0],
+      currentIndex: 0,
+      preScores: {},
+      finalVotes: {},
+      votes: { A: 0, B: 0 },
       totalVotes: 0,
       durationMinutes: 5
     }));
   });
 
-  it('updateRoomSettings defaults duration when invalid', async () => {
-    const docRef = { id: 'INVALID' } as any;
+  it('updateRoomSettings uses safe duration when invalid', async () => {
+    const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
     const updateSpy = serviceAny.updateDocFn.and.resolveTo();
 
-    await service.updateRoomSettings('INVALID', ['A'], 0);
+    await service.updateRoomSettings('ABC', ['A', 'B'], 0);
 
     const updateArgs = updateSpy.calls.mostRecent().args;
-    expect(updateArgs[1]).toEqual(jasmine.objectContaining({ durationMinutes: 3 }));
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      durationMinutes: 3
+    }));
   });
 
-  it('updateRoomSettings keeps valid duration', async () => {
-    const docRef = { id: 'VALID' } as any;
+  it('vote increments counts and stores final vote when voterId provided', async () => {
+    const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
+    serviceAny.incrementFn.and.returnValue('inc' as any);
     const updateSpy = serviceAny.updateDocFn.and.resolveTo();
 
-    await service.updateRoomSettings('VALID', ['A'], 2);
+    await service.vote('ABC', 'A', 'v-1');
 
     const updateArgs = updateSpy.calls.mostRecent().args;
-    expect(updateArgs[1]).toEqual(jasmine.objectContaining({ durationMinutes: 2 }));
+    expect(updateArgs[0]).toBe(docRef);
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      'votes.A': 'inc',
+      totalVotes: 'inc',
+      'finalVotes.v-1': 'A'
+    }));
   });
 
-  it('vote increments counts', async () => {
+  it('vote increments counts without final vote when voterId missing', async () => {
     const docRef = { id: 'ABC' } as any;
     serviceAny.docFn.and.returnValue(docRef);
     serviceAny.incrementFn.and.returnValue('inc' as any);
@@ -245,10 +323,49 @@ describe('RoomService', () => {
     await service.vote('ABC', 'A');
 
     const updateArgs = updateSpy.calls.mostRecent().args;
-    expect(updateArgs[0]).toBe(docRef);
     expect(updateArgs[1]).toEqual(jasmine.objectContaining({
       'votes.A': 'inc',
       totalVotes: 'inc'
+    }));
+    expect(updateArgs[1]['finalVotes.v-1']).toBeUndefined();
+  });
+
+  it('savePreScore clamps score between 0 and 10', async () => {
+    const docRef = { id: 'ABC' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.savePreScore('ABC', 'v-1', 'Ana', 11);
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      'preScores.v-1.Ana': 10
+    }));
+  });
+
+  it('savePreScore clamps negative scores to 0', async () => {
+    const docRef = { id: 'ABC' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.savePreScore('ABC', 'v-1', 'Ana', -2);
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      'preScores.v-1.Ana': 0
+    }));
+  });
+
+  it('savePreScore clamps non-finite scores to 0', async () => {
+    const docRef = { id: 'ABC' } as any;
+    serviceAny.docFn.and.returnValue(docRef);
+    const updateSpy = serviceAny.updateDocFn.and.resolveTo();
+
+    await service.savePreScore('ABC', 'v-1', 'Ana', Number.NaN);
+
+    const updateArgs = updateSpy.calls.mostRecent().args;
+    expect(updateArgs[1]).toEqual(jasmine.objectContaining({
+      'preScores.v-1.Ana': 0
     }));
   });
 

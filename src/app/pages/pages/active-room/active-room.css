@@ -132,6 +132,10 @@ h2 {
   background: rgba(127, 195, 167, 0.25);
 }
 
+.status.reveal {
+  background: rgba(119, 160, 169, 0.25);
+}
+
 .status.closed {
   background: rgba(196, 132, 167, 0.3);
 }
@@ -154,6 +158,12 @@ h2 {
   padding: 16px;
   display: grid;
   gap: 12px;
+}
+
+.current-name {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .results-panel {

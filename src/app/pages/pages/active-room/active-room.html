@@ -22,6 +22,7 @@
         <span
           class="status"
           [class.waiting]="room.status === 'waiting'"
+          [class.reveal]="room.status === 'reveal'"
           [class.voting]="room.status === 'voting'"
           [class.closed]="room.status === 'closed'"
           [class.archived]="room.status === 'archived'"
@@ -33,16 +34,16 @@
       <div class="room-sections">
         <section *ngIf="room.status === 'waiting'" class="panel editor">
           <div class="panel-head">
-            <h2>Configurar votación</h2>
+            <h2>Configurar participantes</h2>
             <span class="panel-pill">Pendiente</span>
           </div>
-          <label for="optionName">Nombres para votar</label>
+          <label for="optionName">Nombres de participantes</label>
           <div class="option-input">
             <input id="optionName" [(ngModel)]="optionName" placeholder="Ej: Equipo A" (keydown.enter)="addOption()" />
             <button type="button" class="primary" (click)="addOption()">Añadir</button>
           </div>
           <div class="duration-row">
-            <label for="durationMinutes">Minutos de votación</label>
+            <label for="durationMinutes">Minutos de votación final</label>
             <div class="duration-input">
               <input
                 id="durationMinutes"
@@ -55,7 +56,7 @@
               <span class="duration-suffix">min</span>
             </div>
           </div>
-          <p class="hint">Agrega al menos 2 nombres y guarda antes de comenzar.</p>
+          <p class="hint">Agrega al menos 2 nombres y guarda antes de iniciar.</p>
 
           <ul class="options" *ngIf="optionsDraft.length">
             <li *ngFor="let option of optionsDraft; let i = index">
@@ -68,18 +69,35 @@
             <button type="button" class="ghost" (click)="saveOptions()" [disabled]="!hasPendingChanges">
               Guardar cambios
             </button>
-            <button type="button" class="primary" (click)="startVoting()">Comenzar votación</button>
+            <button type="button" class="primary" (click)="startReveal()">Iniciar</button>
+          </div>
+        </section>
+
+        <section *ngIf="room.status === 'reveal'" class="panel state">
+          <div class="panel-head">
+            <h2>Revelación sorpresa</h2>
+            <span class="panel-pill">{{ revealProgress.current }} / {{ revealProgress.total }}</span>
+          </div>
+          <p>Participante activo:</p>
+          <h3 class="current-name">{{ currentParticipantName }}</h3>
+          <div class="action-row">
+            <button type="button" class="ghost" (click)="nextParticipant()" [disabled]="isLastReveal">
+              Siguiente participante
+            </button>
+            <button type="button" class="primary" (click)="startFinalVoting()" [disabled]="!isLastReveal">
+              Abrir votación final
+            </button>
           </div>
         </section>
 
         <section *ngIf="room.status === 'voting'" class="panel state">
           <div class="panel-head">
-            <h2>Votación en curso</h2>
+            <h2>Votación final</h2>
             <span class="timer-pill">{{ timeLeft }}</span>
           </div>
           <p>La sala se cerrará automáticamente cuando termine el tiempo.</p>
           <div class="options-preview" *ngIf="room.options?.length">
-            <p class="preview-title">Opciones en votación</p>
+            <p class="preview-title">Participantes</p>
             <ul>
               <li *ngFor="let option of room.options">{{ option }}</li>
             </ul>

@@ -10,6 +10,11 @@ type VoteResult = {
   percent: number;
 };
 
+type ScoreRow = {
+  name: string;
+  score: number | null;
+};
+
 @Component({
   selector: 'app-vote',
   imports: [CommonModule],
@@ -28,6 +33,8 @@ export default class Vote implements OnInit, OnDestroy {
   timeLeft = '';
   hasVoted = false;
   selectedOption = '';
+  voterId = '';
+  scoreScale = Array.from({ length: 10 }, (_, i) => i + 1);
   notice: { type: 'error' | 'success' | 'info'; text: string } | null = null;
   @ViewChild('noticeEl') noticeEl?: ElementRef<HTMLElement>;
   private timerId: number | undefined;
@@ -43,6 +50,8 @@ export default class Vote implements OnInit, OnDestroy {
         return;
       }
 
+      this.ensureVoterId();
+
       if (this.roomSub) {
         this.roomSub.unsubscribe();
       }
@@ -50,6 +59,7 @@ export default class Vote implements OnInit, OnDestroy {
       this.roomSub = this.roomService.getRoomByCode(this.roomCode).subscribe(room => {
         this.room = room;
         this.loading = false;
+        this.ensureVoterId();
         this.updateVoteState();
         this.updateTimer();
         this.cdr.markForCheck();
@@ -76,11 +86,13 @@ export default class Vote implements OnInit, OnDestroy {
       return;
     }
 
-    this.roomService.vote(this.roomCode, option)
+    const voterId = this.ensureVoterId();
+
+    this.roomService.vote(this.roomCode, option, voterId)
       .then(() => {
         this.hasVoted = true;
         this.selectedOption = option;
-        localStorage.setItem(this.voteKey(), option);
+        localStorage.setItem(this.finalVoteKey(), option);
         this.setNotice('success', 'Voto registrado. ¡Gracias!');
         this.cdr.markForCheck();
       })
@@ -88,6 +100,63 @@ export default class Vote implements OnInit, OnDestroy {
         console.error(error);
         this.setNotice('error', 'No se pudo registrar tu voto.');
       });
+  }
+
+  scoreParticipant(score: number) {
+    if (!this.room || this.room.status !== 'reveal') return;
+    const participant = this.currentParticipantName;
+    if (!participant) return;
+
+    const voterId = this.ensureVoterId();
+
+    this.roomService.savePreScore(this.roomCode, voterId, participant, score)
+      .catch(error => {
+        console.error(error);
+        this.setNotice('error', 'No se pudo guardar la puntuación.');
+      });
+  }
+
+  get currentParticipantName(): string {
+    if (!this.room || !Array.isArray(this.room.options)) return '';
+    const order = Array.isArray(this.room.order) ? this.room.order : [];
+    const index = typeof this.room.currentIndex === 'number' ? this.room.currentIndex : 0;
+    const orderIndex = order[index] ?? index;
+    return this.room.options[orderIndex] ?? '';
+  }
+
+  get revealProgress() {
+    if (!this.room || !Array.isArray(this.room.options)) {
+      return { current: 0, total: 0 };
+    }
+    const total = Array.isArray(this.room.order) ? this.room.order.length : this.room.options.length;
+    const index = typeof this.room.currentIndex === 'number' ? this.room.currentIndex : 0;
+    return {
+      current: Math.min(index + 1, total),
+      total
+    };
+  }
+
+  get myScores(): Record<string, number> {
+    const scores = this.room?.preScores?.[this.voterId];
+    if (scores && typeof scores === 'object') {
+      return scores;
+    }
+    return {};
+  }
+
+  get currentScore(): number | null {
+    const participant = this.currentParticipantName;
+    if (!participant) return null;
+    const score = this.myScores[participant];
+    return typeof score === 'number' ? score : null;
+  }
+
+  get myScoresList(): ScoreRow[] {
+    if (!this.room || !Array.isArray(this.room.options)) return [];
+    return this.room.options.map((name: string) => ({
+      name,
+      score: typeof this.myScores[name] === 'number' ? this.myScores[name] : null
+    }));
   }
 
   get results(): VoteResult[] {
@@ -115,9 +184,15 @@ export default class Vote implements OnInit, OnDestroy {
   }
 
   private updateVoteState() {
-    const storedVote = localStorage.getItem(this.voteKey());
-    this.hasVoted = !!storedVote;
-    this.selectedOption = storedVote || '';
+    if (!this.roomCode) return;
+    const finalVote = this.room?.finalVotes?.[this.voterId];
+    const storedVote = localStorage.getItem(this.finalVoteKey());
+    const selected = finalVote || storedVote || '';
+    this.hasVoted = !!selected;
+    this.selectedOption = selected;
+    if (finalVote && finalVote !== storedVote) {
+      localStorage.setItem(this.finalVoteKey(), finalVote);
+    }
   }
 
   private updateTimer() {
@@ -165,7 +240,25 @@ export default class Vote implements OnInit, OnDestroy {
     return new Date(value);
   }
 
-  private voteKey() {
+  private ensureVoterId(): string {
+    if (!this.roomCode) return '';
+    const key = this.voterKey();
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      this.voterId = stored;
+      return stored;
+    }
+    const newId = `v-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    localStorage.setItem(key, newId);
+    this.voterId = newId;
+    return newId;
+  }
+
+  private voterKey() {
+    return `voter:${this.roomCode}`;
+  }
+
+  private finalVoteKey() {
     return `vote:${this.roomCode}`;
   }
 

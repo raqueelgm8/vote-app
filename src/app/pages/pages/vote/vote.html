@@ -16,11 +16,44 @@
     </div>
 
     <div *ngIf="room.status === 'waiting'" class="state">
-      <p>La votación aún no ha empezado.</p>
+      <p>La sala todavía se está preparando.</p>
+    </div>
+
+    <div *ngIf="room.status === 'reveal'" class="state">
+      <div class="reveal-header">
+        <h2>Participante activo</h2>
+        <span class="pill">{{ revealProgress.current }} / {{ revealProgress.total }}</span>
+      </div>
+      <p class="current-name">{{ currentParticipantName }}</p>
+      <p class="hint">Puntúa del 1 al 10.</p>
+      <div class="score-grid">
+        <button
+          *ngFor="let score of scoreScale"
+          class="score-button"
+          [class.active]="currentScore === score"
+          (click)="scoreParticipant(score)"
+        >
+          {{ score }}
+        </button>
+      </div>
+      <p *ngIf="currentScore !== null" class="current-score">
+        Tu puntuación actual: {{ currentScore }}/10
+      </p>
     </div>
 
     <div *ngIf="room.status === 'voting'" class="state">
       <p class="timer">Tiempo restante: {{ timeLeft }}</p>
+
+      <div class="reference" *ngIf="myScoresList.length">
+        <h3>Tus puntuaciones previas</h3>
+        <ul>
+          <li *ngFor="let item of myScoresList">
+            <span>{{ item.name }}</span>
+            <span class="score-badge">{{ item.score ?? '-' }}/10</span>
+          </li>
+        </ul>
+      </div>
+
       <p *ngIf="hasVoted" class="voted">
         Ya has votado por: {{ selectedOption }}.
       </p>

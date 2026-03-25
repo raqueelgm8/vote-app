@@ -79,6 +79,23 @@ export class ActiveRoom implements OnInit, OnDestroy {
     }
   }
 
+  startReveal() {
+    if (!this.roomCode) return;
+    if (this.hasPendingChanges) {
+      this.setNotice('info', 'Guarda los cambios antes de iniciar.');
+      return;
+    }
+
+    this.roomService.startReveal(this.roomCode)
+      .catch(err => console.error(err));
+  }
+
+  nextParticipant() {
+    if (!this.roomCode) return;
+    this.roomService.nextParticipant(this.roomCode)
+      .catch(err => console.error(err));
+  }
+
   startVoting() {
     if (!this.roomCode) return;
     if (this.hasPendingChanges) {
@@ -88,6 +105,10 @@ export class ActiveRoom implements OnInit, OnDestroy {
 
     this.roomService.startVoting(this.roomCode)
       .catch(err => console.error(err));
+  }
+
+  startFinalVoting() {
+    this.startVoting();
   }
 
   shareQrLink() {
@@ -163,6 +184,31 @@ export class ActiveRoom implements OnInit, OnDestroy {
         console.error(err);
         this.setNotice('error', 'No se pudieron guardar los cambios.');
       });
+  }
+
+  get currentParticipantName(): string {
+    if (!this.room || !Array.isArray(this.room.options)) return '';
+    const order = Array.isArray(this.room.order) ? this.room.order : [];
+    const index = typeof this.room.currentIndex === 'number' ? this.room.currentIndex : 0;
+    const orderIndex = order[index] ?? index;
+    return this.room.options[orderIndex] ?? '';
+  }
+
+  get revealProgress() {
+    if (!this.room || !Array.isArray(this.room.options)) {
+      return { current: 0, total: 0 };
+    }
+    const total = Array.isArray(this.room.order) ? this.room.order.length : this.room.options.length;
+    const index = typeof this.room.currentIndex === 'number' ? this.room.currentIndex : 0;
+    return {
+      current: Math.min(index + 1, total),
+      total
+    };
+  }
+
+  get isLastReveal(): boolean {
+    const progress = this.revealProgress;
+    return progress.total > 0 && progress.current >= progress.total;
   }
 
   get results(): RoomResult[] {
@@ -262,6 +308,8 @@ export class ActiveRoom implements OnInit, OnDestroy {
     switch (status) {
       case 'waiting':
         return 'En espera';
+      case 'reveal':
+        return 'Revelación';
       case 'voting':
         return 'Votación';
       case 'closed':

@@ -106,20 +106,6 @@ export class CreateRoomComponent {
 
   }
 
-  startVoting() {
-    if (!this.roomCode) {
-      this.setNotice('info', 'Primero crea una sala.');
-      return;
-    }
-
-    this.roomService.startVoting(this.roomCode)
-      .then(() => this.setNotice('success', `Votación iniciada en sala ${this.roomCode}.`))
-      .catch(error => {
-        console.error(error);
-        this.setNotice('error', 'No se pudo iniciar la votación.');
-      });
-  }
-
   private generateCode(length: number) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
